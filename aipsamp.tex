@@ -43,6 +43,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{mathptmx}
 \usepackage{amsmath}
+\usepackage{multirow}
 \graphicspath{{Pictures/}}
 \begin{document}
 
@@ -163,7 +164,7 @@ The readout of the superconducting qubits is now predominantly done using an anc
 \begin{equation}
 \hat H/\hbar = \frac{\omega_q}{2} \hat \sigma_z + \omega_c \hat a^\dagger \hat a + g(\hat \sigma^- \hat a^\dagger + \hat \sigma^+ \hat a),
 \end{equation}
-where $\omega_q$ is the qubit frequency, $\omega_c$ is the cavity frequency and $g$ is the coupling strength. As long as the RWA is done, this Hamiltonian may be diagonalized analytically:
+where $\omega_q$ is the qubit frequency, $\omega_c$ is the cavity frequency and $g$ is the coupling strength. As long as the RWA is done, this Hamiltonian may be diagonalized analytically\cite{blais2004}:
 \begin{align}
 E_{g, 0} &= \frac{\omega_c - \omega_q}{2},\label{eq:branches1}
  \\
@@ -251,7 +252,7 @@ To substantiate the choice of the optimization algorithms, we present in \autore
 
 The brute force algorithm acts on the grid specified in \autoref{tab:grid}. The ranges in the grid are based on the usual design parameters of the modern qubit samples and the number of steps is chosen to be able to catch the optimal valley in the loss function. 
 
-After the coarse brute force optimization is done and the optimal valley is located, we apply the Nelder-Mead simplex downhill algorithm to polish the brute force result. This algorithm works very well in our case, as one can see from the \autoref{tab:grid} comparing the brute estimation and  the final result after Nelder-Mead is performed. The significant improvement in the loss value of the polished result compared to the brute estimation is due to the more accurate determination of the cavity frequency $f_c$ which leads as well to major shifts in optimal $g$, $f_{q}^{max}$ and $d$.
+After the coarse brute force optimization is done and the optimal valley is located, we apply the Nelder-Mead simplex downhill algorithm to polish the brute force result. This algorithm works very well in our case, as one can see from the \autoref{tab:grid} comparing the brute estimation and  the final result after Nelder-Mead is performed. The significant improvement in the loss value of the polished result compared to the brute estimation is due to the more accurate determination of the cavity frequency $f_c$ which leads as well to major shifts in optimal $g$, $f_{ge}^{max}$ and $d$.
 
 \begin{table}
 \centering
@@ -301,11 +302,11 @@ The fitting algorithm was implemented in Python using brute and Nelder-Mead rout
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{alternative_fits}
-\caption{(a) Two alternative fits (orange and green lines) for the same data (blue dots). The corresponding parameters $f_c,\ g,\ f_{q}^{max}, d$ for the two alternative fits are in shown the legend. (b) Residuals for the two fits, in orange (qubit below) and green (qubit above). RMS errors are 14 kHz and 11 kHz, respectively.}
+\caption{(a) Two alternative fits (orange and green lines) for the same data (blue dots). The corresponding parameters $f_c,\ g,\ f_{ge}^{max}, d$ for the two alternative fits are in shown the legend. (b) Residuals for the two fits, in orange (qubit below) and green (qubit above). RMS errors are 14 kHz and 11 kHz, respectively.}
 \label{fig:alternative-fits}
 \end{figure}
 
-We have tested the algorithm on more than 100 real spectra that we have in our experimental database, and it finds an optimum for any kind of the dependence of the resonance on the flux caused by various dispositions of the qubit and the resonator, as in \autoref{fig:anti_theor}(b),(c). Example fitting results for these cases are provided in \autoref{fit-other-cases}. There is a caveat, however, in some of such cases. It turns out, that for large qubit-cavity detunings two different sets of parameters that are minimizing the loss function equally well are possible. An illustration for this statement can be seen in \autoref{fig:alternative-fits}(a),(b). The algorithm was launched using different grid ranges for $f_q^{max}$. In one case (orange) the search was done below, and in the other (green) above the mean resonance frequency $\langle f_c\rangle_{\Phi_e}$. The resulting fits are equally accurate, and without other information about the system it would not be possible to choose between these two cases. Therefore, some hints may be passed to the algorithm, for instance, whether to look for the qubit above or below the resonator. Otherwise, it would be necessary to check both possibilities with other methods, i.e. via two-tone spectroscopy.
+We have tested the algorithm on more than 100 real spectra that we have in our experimental database, and it finds an optimum for any kind of the dependence of the resonance on the flux caused by various dispositions of the qubit and the resonator, as in \autoref{fig:anti_theor}. Example fitting results for the variants in \autoref{fig:anti_theor}(b,c) are provided in \autoref{fit-other-cases}. There is a caveat, however, in some of such cases. It turns out, that for large qubit-cavity detunings two different sets of parameters minimizing the loss function equally well are possible. An illustration for this statement can be seen in \autoref{fig:alternative-fits}(a),(b). The algorithm was launched using different grid ranges for $f_q^{max}$. In one case (orange) the search was done below, and in the other (green) above the mean resonance frequency $\langle f_c\rangle_{\Phi_e}$. The resulting fits are equally accurate, and without other information about the system it would not be possible to choose between the two. Therefore, some hints should be passed to the algorithm to avoid ambiguity; for instance, whether to look for the qubit above or below the resonator. Otherwise, it would be necessary to check both possibilities with other methods, i.e. via two-tone spectroscopy.
 
 
 \subsection{Analysing qubit spectra}
@@ -331,7 +332,7 @@ The presence of several bright lines along with noise makes it in general imposs
 
 
 
-\subsubsection{Extracting data points}
+\subsubsection{Thresholding the data}
 
 Similar to the reasoning in \autoref{sec:extract_fr}, the first thing to do is to reduce the three-dimensional picture \autoref{fig:twotone} to two dimensions. This is done in several steps.
 
@@ -358,29 +359,57 @@ The final extracted points are shown in \autoref{fig:extract_points} in black cr
 
 \subsubsection{Fitting binary data}
 
-In most cases, even the filtered binary data contains noise and, importantly, is not single-valued for each flux value. This means that standard curve fitting methods are not applicable, and thus we resort to a hybrid algorithm that combines features of Hough transform\cite{hough1962} and local optimization.
+\paragraph{General outline of the method.} In most cases, even the filtered binary data contains noise and, importantly, is not single-valued for each flux value. This means that standard curve fitting methods are not applicable, and thus we resort to a hybrid algorithm that combines features of the Hough transform\cite{hough1962} for global optimization and Nelder-Mead search local optimization. The algorithm bases on three main parts: the point selection procedure, solution ranking and parameter sampling. The selection procedure is universal, and the latter two parts come in two variations depending on which type of optimization will be used.
 
-The key construction for the algorithm is the loss function. The main idea behind it is illustrated in \autoref{fig:hough_illustration}. Three narrow frequency bands of $\Delta f$ are chosen around the model spectral lines. Points outside the bands are considered far away and are ingored. All the points inside a band are attributed to its line and included in its loss function. If at a certain flux there are several points inside a band, only the closest one is chosen and the rest (contentious) are ignored. 
-
-The full loss function is then constructed as follows. Let $P_{1,2,3}$ be the sets of points selected for corresponding transition lines $ge, gf/2, gd/3$; let the number of points in the sets be $N_{1,2,3}$, and $N$ is the whole number of selected points, and $N_0$ is the number of points in magnetic flux; let $D_{1,2,3}$ be the corresponding vertical distances between the selected points and the model. Then the loss function is:
-
-\begin{equation}
-\mathcal{L} = \begin{cases}
-\frac{1}{N^2} \sum_{i=1}^3(\sum_{P_i} D_i/N_i),\ N_1 > N_0/2 \\
-\sum_{P_1} D_1  / N_1
-\end{cases}
-\end{equation}
-
-This loss function has two parts in it. First one works at the coarse scale As one can notice, if the data points mostly come from the spectral lines, the loss function has a deep min	
-
-\begin{figure}
+The general idea for the first part is illustrated in \autoref{fig:hough_illustration}. Here, three narrow frequency bands of $\Delta f$ are chosen around the model spectral lines calculated for tested parameters by \eqref{eq:tr_levels}. Points outside the bands are considered far away and are ignored. All the points inside a band are attributed to its line and included in its loss function. If at a certain flux there are several points inside a band, only the closest one is chosen and the rest (contentious) are ignored. 
+\begin{figure}[b]
 	\centering
 	\includegraphics[width=0.8\linewidth]{hough_illustration}
-	\caption{An illustration for the loss function definition. In different colours are the frequency bands and selected points, black points are ignored.}
+	\caption{An illustration for the loss function definition. In different colours are the frequency bands and the corresponding selected points, black points are ignored.}
 	\label{fig:hough_illustration}
 \end{figure}
+Let $P_{1,2,3}$ be the sets of points selected for corresponding transition lines $ge, gf/2, gd/3$ (in blue, orange and green in \autoref{fig:hough_illustration}); the number of points in the sets are $N_{1,2,3}$, $N_\Sigma = \sum_i N_i$, and $M$ is the total number of measured magnetic flux values; let $D_{1,2,3}$ be the corresponding sets of vertical distances between the selected points and the corresponding spectral lines. Finally, let $D$ be the vertical distances between all the extracted points $P$ (both black and coloured in \autoref{fig:hough_illustration}, total number $N$) and the upper spectral line.
 
 
+The second part of the algorithm now has to evaluate the quality of the fit, i.e. be able to rank supplied sets of optimization parameters. The ranking differs for the brute search and for the local optimization. 
+
+In case of the brute search, the evaluation is based both on the total number of selected points $N_\Sigma$ and the normalized squared distances $\langle D_\Sigma^2 \rangle  = {\sum_i \sum_{P_i} D_i^2/N_1}$ (note that we normalize based just on $N_1$ to respect the majority voting in case of low $N_2, N_3$). Maximizing the total number of points included ought to have a higher priority than minimizing the average distances, since otherwise a single selected point lying exactly on the spectral line would win. However, in the presence of spurious spectral lines this prioritization may lead to wrong results since an incorrect solution with a slightly larger $N_\Sigma$ but high normalized distance measure would overshadow the correct one with a low distance measure. To battle this effect and increase the influence of the distance loss, we quantize $N_\Sigma$ into bins of size $N_b$ equal to 25\% of the total number of fluxes $M$, and then choose from the best bin the solution having the lowest distance measure. 
+
+Alternatively, for the Nelder-Mead algorithm one should build a loss function that returns just a single value instead of a double-valued rank as before. Since we still want to both maximize the number of points and minimize the mean distances, we take again same binned value $[N_\Sigma/N_b]N_b$ and $\langle D_\Sigma^2 \rangle$ but now calculate the function
+\begin{equation}
+\mathcal{L}_{N\text{-}M} = \frac{1}{[N_\Sigma/N_b]N_b} + \langle D_\Sigma^2 \rangle.
+\end{equation}
+This loss function has a convex shape near the sought extremum; this makes it possible to run the Nelder-Mead algorithm seamlessly.
+  
+Finally, the third part of the algorithm is either the brute force search to find the global extremum or the Nelder-Mead descent to polish the found parameters.
+
+Note the similarity between this construction and the Hough transform. The transform is implemented by quantizing the Hough parameter space into finite intervals or accumulator cells that each point votes for. Likewise, we use the frequency band (frequency quantization) to find the points voting for a certain parameter set; other parameters are as well quantized on a brute search grid. However, our approach is extended by a subsequent local optimization necessary since we want to improve the accuracy beyond brute grid resolution.
+
+To sum up, the local optimization is done on points belonging to a narrow frequency band around the spectral line when this band contains as many points as possible. This logic is applicable both to single-line and multi-line fitting. In the following, we will use single-line fitting to find at least one spectral line in the point cloud, and then full multi-line fitting to detect all lines that may be present.
+
+
+\paragraph{Single-line optimization}
+
+First of all, we refine some given coarse initial values for the qubit parameters (period $\Pi_{\Phi_r}^{(0)}$, sweet spot location $\Phi_r^{(0)}$, $f_{ge}^{max, (0)}$ and $d^{(0)}$). This is necessary because usually the initial guess comes from the results of the single-tone spectroscopy fitting which may be inaccurate due to noise. The refinement is performed using a single spectral line by two brute force searches and then a Nelder-Mead optimization on the chosen points. 
+
+First brute force is done with a wide frequency band $\Delta f$=100 MHz around it and a grid specified in .
+
+\begin{table}
+	\centering
+	\begin{ruledtabular}
+		\begin{tabular}{*5c} 
+			\multicolumn{2}{c}{Optimization} & $\Phi_r$ & $f_{ge}^{max}$ &  	$d$\\
+			\hline
+			\multirow{2}{*}{Brute 1} & range & $\Phi_r^{(0)}\pm .05\, \Pi_{\Phi_e}^{(0)}$ & $f_{ge}^{max, (0)}\pm 30\%$ & 0.1 - 0.9  \\
+			&steps & 10& 50& 8\\
+			\multirow{2}{*}{Brute 2} & range & $\Phi_r^{(1)}\pm .02\, \Pi_{\Phi_e}^{(0)}$ & $f_{ge}^{max, (1)}\pm 100$ MHz & $d^{(1)}\pm 0.1$ \\
+			& steps & 10 & 20 & 10
+		\end{tabular}
+	 
+\end{ruledtabular}
+	\caption{Grid specifications for the brute force algorithm and the resulting optimal points. The number of steps is taken with some margin to ensure correct location of the optimal valley even for difficult cases. The optimal parameters estimated by brute force and the final ones have the RMS loss values of 0.258 MHz and 0.024 MHz, respectively.}
+	\label{tab:grid_tts}
+\end{table}
 
 
 
