@@ -81,150 +81,93 @@ To build a full-scale quantum processor it is necessary to automate as many step
 
  \renewcommand*{\figureautorefname}{Fig.}
 
-\section{\label{sec:level1} Motivation}
+\section{\label{sec:level1} Introduction}
 
-Experiment automation, automatic data processing and decision making is vital in developing even a small scale quantum processor. For superconducting qubits, large companies such as Google \cite{kelly2018}, Rigetti\cite{bloom2018} and IBM\footnote{{https://quantumexperience.ng.bluemix.net}} already use to some extent automated procedures for calibration of the qubit parameters and tuning up the single and two-qubit gates. This is not surprising since performing experiments with superconducting qubits is usually quite demanding in terms of human time. For example, to fully characterize a tunable transmon qubit coupled to a resonator (which assumes extracting the Hamiltonian parameters and coherence times) in an ideal scenario one would need to perform at least 10 individual measurements of different kinds\footnote{resonator characterization, single-tone spectroscopy, two-tone spectroscopy, excitation and readout power calibration, IQ mixer calibration, Rabi oscillations, Ramsey oscillations, fine excitation frequency adjustment, fine $\pi$-pulse adjustment, $T_1$, $T_2$, $T_{2E}$ measurements}\textsuperscript{,}\cite{chen2018}. Each of those experiments needs constant monitoring and parameter adjustments which may take days if, for example, several qubit chips are being examined. Moreover, more elaborate experiments such as measuring the coherence times versus some control parameters combinations or versus time are just impossible to do by hand despite having tremendous value to the characterization of the fabrication technology\cite{barends2013, klimov2018}.
+Computation on a quantum computer is realized by analog manipulations of large numbers of physical quantum bits (qubits). One of the most significant challenges is that today’s qubit systems are not produced identical and cannot be operated identically\cite{kelly2018, chen2018}: typically, control parameters for a device are determined by following a carefully chosen sequence of calibration experiments, and vary among the devices. Since manual tuning of these parameters is not a scalable solution, operating a few dozens of qubits requires developing an autonomous system able to handle the physical device calibration on its own. Moreover, a lot of research is still being done to find the optimal chip designs and fabrication methods. It includes gathering statistics, i.e. many different samples should be measured and consistently evaluated. An automated tool not only will significantly speed up this process, but as well exclude human error.
 
-Nonetheless, the subject is not represented abundantly in academic literature, and some experiments, for example, spectroscopy, are still being executed by hand\cite{chen2018}. Possibly, this can be attributed the the fact that it is not straightforward to implement a fully autonomous system that would be able to handle the experiment from the very beginning. While in research this state of affairs is acceptable since even a human experimenter does not know beforehand what kind of algorithm he should apply, it is definitely a problem for the development of the quantum computing chips. To develop such system, firstly, it is necessary to create an efficient and robust processing tool that will be able to handle all kinds of experimental data and replace human operator in terms of extracting the physical qubit parameters.
+In this work, we are proposing and implementing several methods of data processing and computer vision that allow for automatic calibration of circuit QED\cite{blais2007} architectures used for the readout of superconducting qubits. Our method is accurate, fast and robust to noise, is applicable to superconducting qubits with a periodic and parametrizable spectrum, and is compatible with the state-of-the-art paradigm of one readout resonator per one qubit\cite{versluis2017, kelly2015}. Therefore, the suggested approach is scalable and can be applied to processors with any number of qubits.
 
-In this work, we are proposing and implementing several methods of data processing and computer vision that tremendously facilitate the spectroscopy of circuit QED\cite{blais2007} architectures widely used for the readout the qubit states. Our method is accurate, fast and robust to noise, is applicable to any type of superconducting qubit that has a periodic and parametrizable spectrum, and is fully compatible with the state-of-the-art paradigm of one readout resonator per one qubit\cite{versluis2017, kelly2015}. This means that our approach is scalable and can be applied to processors with any number of qubits. To achieve this we have employed several optimization algorithms to find spectral data from the heatmap plots that are ubiquitous in the domain.
+The flow of an experiment that characterizes a single qubit on a chip is depicted schematically in \autoref{fig:detection}(a). It is similar to the classic procedures described in Refs. [\onlinecite{jerger2013, chen2018}] for measuring cQED samples with tunable qubits. Additionally, it is close conceptually to the patent application Ref. [\onlinecite{bloom2018}] describing automatic calibration for non-tunable qubits.
 
-
-\section{Background}
-
-
-The methods that we use are relying heavily on the theoretical formalism that describes the behaviour of the superconducting qubits and cQED systems\cite{blais2004}. Thus, below we are introducing briefly the key concepts and equations that will be used in the following sections.
-
-Without significant loss of generality, we will consider a tunable transmon\cite{koch2007} qubit capacitively coupled to a notch-type readout resonator. This architecture is currently widely used\cite{barends2013} and therefore serves a good example to demonstrate the algorithms performance.
-
-\subsection{Transmon qubit}
-
-The simplest version of this qubit consists of a Josephson junction shunted with a large capacitor. Flux tunability of the frequency is attained by replacing a single Josephson junction with a SQUID as in \autoref{fig:trans}(a) and applying external magnetic flux $\Phi_e$ to its loop. This configuration can be equivalently represented with a shunted junction of tunable energy, \autoref{fig:trans}(b). The Hamiltonian for such equivalent circuit is as follows: 
-\begin{equation}
-\hat{H}_{tr} = 4E_C \hat n^2 - E_J(\Phi_e) \cos \hat\varphi,
-\label{eq:tr_ham}
-\end{equation}
-where $E_{J1,2}$ are the Josephson energies , $E_C = e^2/2C_{\Sigma}$, $C_{\Sigma} = C_s + C_1 +C_2$, is the charging energy, $\hat n$ and $\hat \varphi$ are the operators for the Cooper pair number and the phase of the qubit island. For the equivalent Josephson energy $E_{J}$ one obtains
-\begin{equation}
-E_{J}(\Phi_e) = E_{J\Sigma}\cos\varphi_e \sqrt{1+d^2 \tan^2 \varphi_e},
-\label{eq:EJ_Phie}
-\end{equation}  
-where $E_{J\Sigma} = E_{J1}+E_{J2}$, $\varphi_e = \pi \Phi_e/\Phi_0$, $d = \frac{E_{J1}-E_{J2}}{E_{J1}+E_{J2}}$ is the asymmetry of the SQUID. As one can notice, the dependence is periodic in $\Phi_e$.
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{transmon}
-\caption{(a) A tunable transmon circuit with an asymmetric SQUID, $E_{J1} \neq E_{J2}$. (b) Equivalent transmon with tunable energy $E_{J}(\Phi_e)$ and unified capacitance $C_{\Sigma}$. The qubit island containing its single degree of freedom is in blue.}
-\label{fig:trans}
-\end{figure}
-\begin{table}
-\centering
-\begin{tabular}{l|c}
-Level & Energy\\
-\hline
-$g\ (E_0)$ & 0\\
-$e\ (E_1)$ & $\sqrt{8E_J E_C} - E_C$\\
-$f\ (E_2)$ & $2\sqrt{8E_J E_C} - 3 E_C$\\
-$d\ (E_3)$ & $3\sqrt{8E_J E_C} - 6 E_C$\\
-$E_4$ & $4\sqrt{8E_J E_C} - 10 E_C$\\
-\hline
-\end{tabular}\quad
-\begin{tabular}{l|c}
-Transition & Frequency\\
-\hline
-$ge$ & $\omega_{ge}$ \\
-$gf/2$ & $\omega_{ge} - 0.5 E_C$\\
-$ef$, $gd/3$& $\omega_{ge}-E_C$\\
-$ed/2$ & $\omega_{ge} - 1.5 E_C$\\
-$fd$, $e E_4/3$ & $\omega_{ge}-2 E_C$\\
-\hline
-\end{tabular}
-\caption{Energies and some transition (single and multi-photon) frequencies for the first 5 levels of the transmon calculated with \eqref{eq:tr_levels}.}
-\label{tab:tr_transitions}
-\end{table}
-It is also possible to derive analytical expressions for the energy levels and transition frequencies for this type of qubits. The energy of the $m$\textsuperscript{th} level is \cite{koch2007}
-\begin{equation}
-E_m = m \sqrt{8E_J(\Phi_e) E_C} -\frac{E_C}{12}(6m^2+6m),
-\label{eq:tr_levels}
-\end{equation}
-and some of the transition frequencies are presented in \autoref{tab:tr_transitions}. The qubit frequency $f_{ge} = \omega_{ge}/2\pi$ may be approximated as $$\sqrt{8 E_J (\Phi_e) E_C} = f_{ge}^{max} \sqrt{\cos\phi_e \sqrt{1+d^2 \tan^2\phi_e}},$$
-$f_{ge}^{max} = \sqrt{8 E_J(0) E_C}$, to make it depending on just two parameters instead of three.
-
-
-\subsection{Circuit QED}
-
+First of all, it is necessary to detect the positions of the resonance peaks corresponding to the readout resonators. Resonator search provides the scan range for the probe frequency $\Delta f_p$ in single-tone spectroscopy (STS). STS records the behaviour of the resonance peak while changing the magnetic field applied to the sample  (controlled by some current $I$). By processing the results of the STS, one can find the parameters of the cQED system. Precisely, coarse estimation $f^{(0)}_{ge}(I)$ of the shape of the dependence of the qubit frequency on current and fine estimation of the resonator frequency $f_r(I)$ and coupling strength $g$. Using these data, one mey set the scan range for the two-tone spectroscopy (TTS) in excitation frequency $\Delta f_{exc}$ and current $\Delta I$. Next, from TTS, we can obtain various qubit transition frequencies dependence on current $f_{ge}(I), f_{gf/2}(I),$ etc. with accuracy sufficient for pulsed experiments.  After that, pulsed calibrations may be started to optimize, for example, single qubit gate fidelities. As one can see, the process is structured so that the results of one measurement generally define the parameters of the next, successively acquiring more accurate information about the physical cQED system.
 
 \begin{figure*}
-\centering
-\includegraphics[width=\textwidth]{anti_theor}
-\caption{Frequency spectrum of the transmon-resonator system. Parameters used: $f_{ge}(0) \approx \sqrt{8E_C E_J(0)}/2\pi = 8.5$ GHz, $d=0.3$, $f_r=6.4$ GHz, $g = 30$ MHz. For each subplot two transition branches $f_{\pm} = (E_{\pm,0} - E_{g,0})/2\pi$ (orange and blue, respectively) both forming the resonator and qubit lines . As one can notice, there are three qualitatively different cases of the resonator-qubit disposition. Lower row shows a zoomed area around $f_c$ that looks differently in each case.}
-\label{fig:anti_theor}
-\end{figure*}
+	\centering
+	\includegraphics[width=\linewidth]{detection}
+	\caption{(a) Common experiment flow for a tunable-frequency qubit: usually, three continuous wave spectroscopic measurements are performed before pulsed experiments, and each next experiment is based on the results of the previous ones. (b) Examples of the desired results after the detection for two qualitatively different STS outcomes. The heatmaps should be brought into correspondence with the 2D model curves. In the first row, two model curves that should be fitted simultaneously since the model is discontinuous. (c) Examples of the desired results after processing TTS data. The heatmap should be brought into correspondence with the model of the qubit spectrum which may not be single-valued since several transitions may be visible.}
+	\label{fig:detection}	
+\end{figure*} 
 
-The readout of the superconducting qubits is now predominantly done using an ancilla system which is usually implemented as a superconducting microwave resonator which acts as an electromagnetic cavity in the standard cavity QED. Truncating the qubit to two levels, one may obtain the following Hamiltonian for the compound cavity-qubit system (in RWA):
-\begin{equation}
-\hat H/\hbar = \frac{\omega_q}{2} \hat \sigma_z + \omega_c \hat a^\dagger \hat a + g(\hat \sigma^- \hat a^\dagger + \hat \sigma^+ \hat a),
-\end{equation}
-where $\omega_q$ is the qubit frequency, $\omega_c$ is the cavity frequency and $g$ is the coupling strength. As long as the RWA is done, this Hamiltonian may be diagonalized analytically\cite{blais2004}:
+All the measurement outcomes may be divided in two groups: some results contain 2D data (a single-valued function f(x) on XY plane), and others contain 3D data (heatmap images). The scope of this work is confined to the automatic analysis the latter type of experimental data. In \autoref{fig:detection}(b),(c) we illustrate examples of the correlated measured data and theoretical model. \autoref{fig:detection}(b) shows that STS data should be interpreted using two discontinuous curves (upper row) or a single continuous curve (lower row) that are defined by the model. Then, \autoref{fig:detection}(c) shows how qubit spectral lines should be detected. The main difficulties are that several spectral lines that need detection may be observed even for a single qubit (and thus the model is not single-valued), that spurious non-qubit transitions should be ignored, and the noise.
+
+Since the implementation of our methods relies on the theoretical description of studied physical systems, in Appendices \ref{sec:transmon} and \ref{sec:cqed} we derive all the necessary equations to form the model curves that should be found in single- and two-tone spectroscopy data. In this work we will take a transmon qubit with asymmetric SQUID as an example, however for different types of qubits the logic will stay the same. For the singe-tone spectroscopy, they model curves are (see \autoref{fig:detection}(b)):
 \begin{align}
-E_{g, 0} &= \frac{\omega_c - \omega_q}{2},\label{eq:branches1}
- \\
-E_{\pm, n} &= (n+1)\omega_c \pm \frac{1}{2}\sqrt{4g^2(n+1)+(\omega_q-\omega_c)^2}.
-\label{eq:branches2}
+f_\pm(I) = f_r(I) = \frac{f_c + f_{ge}(I)}{2} \pm \sqrt{g^2+(f_{ge}(I) - f_c)^2/4},\label{eq:f_r}
 \end{align}
+where $f_c$ stands for current-independent bare cavity frequency. Here we note that for the avoided crossings pattern both curves are necessary; alternatively, for the cases when the qubit is entirely below (above) the bare cavity frequency only $ f_+(I)\ \left(f_-(I)\right)$ is used. 
 
-This is very convenient for our purposes. By substituting the dependence of the qubit frequency $\omega_q \equiv \omega_{ge} = 2\pi f_{ge}$ on some control parameter into these equations we can get straightforwardly the full system spectrum in dependence on that parameter. In \autoref{fig:anti_theor} we have used the equations \eqref{eq:tr_levels}, \eqref{eq:branches1} and \eqref{eq:branches2} to model a tunable transmon interacting with a cavity for various $\Phi_e$ and various $f_{ge}^{max},\ d$. In the lower row of the figure, one can see that it is possible to extract the dependence of the \textit{cavity} frequency $\omega_c = 2\pi f_c$ on $\Phi_e$; for example, the well-known avoided crossing pattern can be directly observed in \autoref{fig:anti_theor}(a), and the other two possible behaviours for the qubit entirely above or below the resonator in \autoref{fig:anti_theor}(b),(c). To shorten the notation, in the following we will define the corresponding branch frequencies of \eqref{eq:branches2} as $f_{\pm} = ( E_{\pm,0}-E_{g,0})/2\pi$.
+For the two-tone spectroscopy, we take the dependence of the qubit transitions on current $f_{ge, gf/2, ef}(I)$ are expressed as
+\begin{equation}
+\begin{gathered}
+f_{ge}(I) = f_{ge}^{max} \left[\cos^2\left(\frac{\pi(I-I^0)}{\Pi}\right)+d^2 \sin^2 \left(\frac{\pi(I-I^0)}{\Pi}\right)\right]^\frac{1}{4}, \\
+f_{gf/2} = f_{ge} + \alpha/2,\ f_{ef}=f_{ge} + \alpha
+\end{gathered}
+\end{equation}
+where $\Phi_0$ is the flux quantum, $d$ is the SQUID asymmetry, $\alpha$ is the anharmonicity of the transmon equal to it's negative charging energy $-E_C$, and $f_{ge}^{max}$ is the qubit frequency at $I = I^0$; $I^0$ is current exactly compensating the non-zero residual flux that is always present in experiment and coming from the local magnetic fields on the chip; we will additionally use $I^{\frac{\pi}{2}}$ to denote the current of minimum frequency. Finally, $\Pi$ is the period of the spectrum in current.
 
-In \autoref{fig:anti_theor}(a) it is also possible to see the entire spectrum of a transmon $ge$ transition predicted by equations \eqref{eq:EJ_Phie}, \eqref{eq:tr_levels}. It has a cosine-like periodic shape with a period of one flux quantum $\Phi_0$. Consequently, it has two extrema, the upper and the lower which are called ``sweet spots'' due to the first-order insensitivity to $\Phi_e$, and thus to possible flux noise. In the following, by saying sweet spot we will assume the upper one whose frequency is $f_{ge}(\Phi_e = 0) \equiv f^{max}_{ge}$ .
+In overall, we have 6 fitting parameters for the single-tone spectroscopy ($f_c$, $g$, $\Pi$, $I^0$, $f_{ge}^{max}$, $d$) and  5 parameters for the two-tone ($\Pi$, $I^0$, $f_{ge}^{max}$, $d$, $\alpha$).
 
-We will use the model \eqref{eq:branches1}, \eqref{eq:branches2} to fit the resonator frequency that we can find in an experiment. The only conceptual problem for the fitting that is left now is that the function we want to use as a model is not single-valued. Indeed, in \autoref{fig:anti_theor}(a, top) for each value of magnetic flux we always find two frequency points corresponding to the qubit and to the resonator, respectively. However, in practice only a narrow scan around the resonator frequency such as in \autoref{fig:anti_theor}(a, bottom) is required, and thus no ambiguity occurs. 
+Finally, the structure of the rest of the paper is as follows. First, we will describe our fitting method for the STS data; then, we will cover the algorithm to detect qubit spectral lines on TTS data. Finally, the fitting accuracy, performance and reliability of both procedures will be assessed.
+
 
 
 \section{Methods}
 
-In this section the actual algorithms that perform fitting and data extraction are discussed. Additionally, we describe important peculiarities of the data itself and some essential experimental details.
+In this section the actual algorithms that perform fitting and data extraction are discussed. Additionally, we describe important peculiarities of the data itself and some essential experimental details. Without loss of generality, we will consider a tunable transmon\cite{koch2007} qubit capacitively coupled to a notch-type readout resonator. This architecture is currently widely used\cite{barends2013} and therefore serves as a good example to describe the algorithm.
+
 
 \subsection{Analysing resonator spectra}
 
-In the real life applications, the spectrum of the resonator is usually recorded with a vector network analyzer which measures the complex scattering parameter $S_{21}$ for each probe frequency $f_p$ in a certain area around the resonance. Hence, after the VNA scan there are two 2D plots for the amplitude and the phase of the transmission versus frequency. When the magnetic flux sweep is added, the data becomes three-dimensional and has to be represented  visually using a heatmap plot. One such heatmap for a notch-port resonator coupled to a transmon qubit is presented in \autoref{fig:anti_exp}(a). Please notice, that in all cases it is not possible to know which flux $\Phi_e$ is applied to the SQUID. The experimenter usually knows only the current (or voltage) which he applies to some coil and which is connected linearly to $\Phi_e$: $\Phi_e = M I + \Phi_r$, where $M$ stands for the mutual inductance of the coil and the SQUID, and $\Phi_r$ is some residual flux. We will call the currents for the high and low transmon sweet spots $I^{max},\ I^{min}$, respectively.
+In the real life applications, the spectrum of the resonator is usually recorded with a vector network analyzer which measures the complex scattering parameter $S_{21}$ for each probe frequency $f_p$ in a certain area around the resonance. Hence, after the VNA scan there are two 2D plots for the amplitude and the phase of the transmission versus frequency. When the magnetic flux sweep is added, the data becomes three-dimensional and has to be represented  visually using a heatmap plot. One such heatmap for a notch-port resonator coupled to a transmon qubit is presented in \autoref{fig:anti_exp}(a).
 \begin{figure}[h!]
 \includegraphics[width=\linewidth]{anti_subplots}
-\caption{(a) An experimental spectrum of a resonator strongly coupled to a transmon qubit depending on the coil current generating the magnetic flux $\Phi_e$. (b) Slices of the transmission from (a) showing two slices with fits (1,3) and a plateau with no dip (2) present. (c) Extracted data (blue dots) and mean frequency value over all points $\langle f_r \rangle_{\Phi_e}$ (black dashed line). Grey arrows show where $f_r - \langle f_r \rangle_{\Phi_e}$ changes sign.}
+\caption{(a) An experimental spectrum of a resonator strongly coupled to a transmon qubit depending on the coil current $I$. (b) Slices of the transmission from (a) showing two slices with fits (1,3) and a plateau with no dip (2) present. (c) Extracted data (blue dots) and mean frequency value over all points $\langle f_r \rangle_{I}$ (black dashed line). Grey arrows show where $f_r - \langle f_r \rangle_{I}$ changes sign.}
 \label{fig:anti_exp}
 \end{figure}
 
-The idea is to fit the image shown \autoref{fig:anti_exp}(a) with the model equations \eqref{eq:branches1}, \eqref{eq:branches2}. This task is not trivial because  it belongs to a class of optimization problems where the loss function (i.e. in the least squares algorithm) is ill-defined. This is due to the periodic dependence of the frequencies on $\Phi_e$ (and $I$) and unknown position of the qubit sweet spot due to the local residual flux. Fortunately, it is possible to get a good initial guess for these parameters and then brute force the solution since we have a well defined bounds for each of the variables left. 
+Fiting the image shown \autoref{fig:anti_exp}(a) with the model equations \eqref{eq:f_r} is not a trivial task because it belongs to a class of optimization problems where the loss function (i.e. in the least squares algorithm) is ill-defined. This is due to the periodic dependence of the frequencies on current $I$ and unknown position of the qubit sweet spot $I^0$ due to the local residual flux. Fortunately, it is possible to get a good initial guess for these parameters and then brute force the solution in other variables since we have a well defined bounds for each of the variables left. Finally, we can polish the result in all six parameters using a Nelder-Mead search.
 
-The outline of the method which uses \autoref{fig:anti_exp}(a) as an example is presented below. The chosen type of the resonator-qubit arrangement which yields the avoided crossing pattern is not universal: there are two other cases when the qubit spectrum lies entirely below or above the resonator frequency, as in \autoref{fig:anti_theor}(b),(c). However, they are treated exactly the same way.
+The outline of the method which uses \autoref{fig:anti_exp}(a) as an example is presented below. The chosen type of the resonator-qubit arrangement which yields the avoided crossing pattern is not universal: there are two other cases when the qubit spectrum lies entirely below or above the resonator frequency, however, they are treated exactly the same way and are simpler in terms of the loss function behaviour at all steps of our algorithm.
 
-\subsubsection{Extracting $f_r(\Phi_e)$ from data}\label{sec:extract_fr}
+\subsubsection{Extracting $f_r(I)$ from data}\label{sec:extract_fr}
 
-The first thing to do is to reduce the dimensionality of the data, i.e. extract the resonance frequency for each $\Phi_e$ and then be left with the desired $f_r(\Phi_e)$. 
+The first thing to do is to reduce the dimensionality of the data, i.e. extract the resonance frequency for each $I$ and then be left with the desired $f_r(I)$. 
 
-We do this by employing the \textit{circlefit}\cite{probst2015} library which is capable of fitting various types of microwave resonators. For each $\Phi_e$ we fit the complex transmission $S_{21}(f)$ as in \autoref{fig:anti_exp}(b) (solid black lines) and extract the resonance frequency from the model. The only possible caveat is that for some $\Phi_e$ values the resonance dip may disappear (see \autoref{fig:anti_exp}(b)) and the fit will fail. Such slices are thus excluded in advance via a threshold condition.
+We do this by employing the \textit{circlefit}\cite{probst2015} library which is capable of fitting various types of microwave resonators. For each $I$ we fit the complex transmission $S_{21}(f_p)$ as in \autoref{fig:anti_exp}(b) (solid black lines) and extract the resonance frequency from the model. The only possible caveat is that for some $I$ values the resonance dip may disappear (see \autoref{fig:anti_exp}(b)) and the fit will fail. Such slices are thus excluded in advance via a threshold condition.
 
-The resulting plot of extracted frequency is shown in \autoref{fig:anti_exp}(c) with blue dots. There are some current values located between the branches for which the points are missing, as expected. Additionally, we plot here another key parameter which is the mean value of the detected frequencies shown as a dashed black line. Firstly, this parameter will serve as an initial guess for the cavity frequency of the model \eqref{eq:branches1}, \eqref{eq:branches2}: $f_c \approx \langle f_r \rangle_{\Phi_e}$.  Secondly, it serves as a baseline used in the following period and phase extraction algorithm which tracks the changes of the sign of the value $\Delta f_r = f_r - \langle f_r \rangle_{\Phi_e}$ (marked as grey dashed lines in \autoref{fig:anti_exp}(c)). These sign changes are crucial in determining the location of the qubit sweet spot. 
+The resulting plot of extracted frequency is shown in \autoref{fig:anti_exp}(c) with blue dots. There are some current values located between the branches for which the points are missing, as expected. Additionally, we plot here another key parameter which is the mean value of the detected frequencies shown as a dashed black line. Firstly, this parameter will serve as an initial guess for the cavity frequency of the model \eqref{eq:f_r}: $f_c \approx \langle f_r \rangle_{I}$.  Secondly, it serves as a baseline used in the following period and phase extraction algorithm which tracks the changes of the sign of the value $\Delta f_r = f_r - \langle f_r \rangle_{I}$ (marked as grey dashed lines in \autoref{fig:anti_exp}(c)). These sign changes are crucial in determining the location of the qubit sweet spot. 
 
 \subsubsection{Extracting period, phase and sweet spot locations}
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{per+phase}
-\caption{Period and phase extraction procedure. (a) Autocorrelation function depending on the lag $\Delta I$ shows a prominent local maximum at $88\ \mu$A (orange dot). (b) Construction for phase estimation; $\Delta f_r = f_r-\langle f_r \rangle_{\Phi_e}$ (blue) is fitted with a square wave (orange, start marked with a triangle). Vertical bars mark candidate sweet spots. (c) Loss function (normalized) for the square wave fitting procedure from (b); red cross indicates the parameters of the meander shown there.}
+\caption{Period and phase extraction procedure. (a) Autocorrelation function depending on the lag $\Delta I$ shows a prominent local maximum at $88\ \mu$A (orange dot). (b) Construction for phase estimation; $\Delta f_r = f_r-\langle f_r \rangle_{I}$ (blue) is fitted with a square wave (orange, start marked with a triangle). Vertical bars mark candidate sweet spots. (c) Loss function (normalized) for the square wave fitting procedure from (b); red cross indicates the parameters of the meander shown there.}
 \label{fig:per+phase}
 \end{figure}
-As we have said above, one of the serious obstacles for the fitting is that the periodicity of the data on one of the fitting parameters. Along with the equally unknown phase of the signal, this leads to the presence of many local minima in the loss function which severely impede the progress of iterative optimization algorithms. In other words, the unknown coefficients $M$ and $\Phi_r$ in the dependence of $\Phi_e$ on the coil current $I$ are preventing us to find the global minimum we need. Fortunately, it is possible to find the period and the phase (or, alternatively, $\Phi_r$, or the sweet spot location) of the data without fitting the full model Eqs. \eqref{eq:branches1}, \eqref{eq:branches2} which alleviates the stated problem. of course, in the absence of noise, this would be a trivial task. However, in the real-life conditions the noise to some extent is always present, so below we engineer a solution that is insensitive to local sporadic perturbations of the data.
+As we have said above, one of the serious obstacles for the fitting is that the periodicity of the data on one of the fitting parameters. Along with the equally unknown phase of the signal, this leads to the presence of many local minima in the loss function which severely impede the progress of iterative optimization algorithms. In other words, the unknown parameters $\Pi$ and $I^0$ are preventing us to find reliably the global minimum we need. Fortunately, it is possible to find the period and the sweep spot location (or, the phase of the data) without fitting the full model \eqref{eq:f_r} which alleviates the stated problem. In the absence of noise, this would be a trivial task. However, in the real-life conditions the noise to some extent is always present, so below we engineer a solution that is insensitive to local sporadic perturbations of the data.
 
-A very powerful tool for finding the period $\Pi_f$ in a given dataset $y$ especially when it contains just a few periods is the autocorrelation function $\mathcal{R}_{y y}(l) = \sum_n y_n y_{n-l}$. The location of the largest of its local maxima (except for the $l=0$) equals exactly the sought period. However, this is only true when the mean value of the function is zero; otherwise, $\mathcal{R}_{y y}(l)$ would be linear with a very steep slope smearing out all the extrema. Therefore, instead of $f_r (\Phi_e)$ we consider the function $\Delta f_r (\Phi_e)$ introduced above which has zero mean and the same period. For this function, which looks exactly like one from \autoref{fig:anti_exp}(c) but centered vertically around zero, the autocorrelation function $\mathcal{R}_{\Delta f_r \Delta f_r}(\Delta I)$ is shown in \autoref{fig:per+phase}(a). As one can see, it depends on the current offset $\Delta I$ which spans 200 $\mu$A just as the data itself. This means that the data is being zero-padded at all $\Delta I$ except for $\Delta I = 0$, and this is why we get a diminishing value of the correlation peaks when the lag reaches $\Pi_{f_r}$ or $2\Pi_{f_r}$. The orange dot in the plot shows the highest local extremum of $\mathcal{R}_{\Delta f_r \Delta f_r}(\Delta I)$ at 88 $\mu$A. It is a very prominent peak and can be easily distinguished among all others. There is as well a small peak at 176 $\mu$A which corresponds to $\Delta I = 2\Pi_{f_r}$. Note that the the autocorrelation function is not smooth. This is because there were some missing points in the data (corresponding to the plateaus of \autoref{fig:anti_exp}(b)) that were replaced by zeros to ensure correct mapping between current indices and current values. This can be noticed as well in \autoref{fig:per+phase}(b).
+A powerful tool for finding the period in a given dataset $y$ especially when it contains just a few periods is the autocorrelation function $\mathcal{R}_{y y}(l) = \sum_n y_n y_{n-l}$. The location of the largest of its local maxima (except for the $l=0$) equals exactly the sought period. However, this is only true when the mean value of the function is zero; otherwise, $\mathcal{R}_{y y}(l)$ would be linear with a very steep slope smearing out all the extrema. Therefore, instead of directly calculating the autocorrelation of $f_r (I)$ we consider the function $\Delta f_r (I)$ introduced above which has zero mean and the same period. For this function, which looks exactly like one from \autoref{fig:anti_exp}(c) but centered vertically around zero, the autocorrelation function $\mathcal{R}_{\Delta f_r \Delta f_r}(\Delta I)$ is shown in \autoref{fig:per+phase}(a). As one can see, it depends on the current offset $\Delta I$ which spans 200 $\mu$A just as the data itself. This means that the data is being zero-padded at all $\Delta I$ except for $\Delta I = 0$, and this is why we get a diminishing value of the correlation peaks when the lag reaches $\Pi$ or $2\Pi$. The orange dot in the plot shows the highest local extremum of $\mathcal{R}_{\Delta f_r \Delta f_r}(\Delta I)$ at 88 $\mu$A. It is a very prominent peak and can be easily distinguished among all others. There is as well a small peak at 176 $\mu$A which corresponds to $\Delta I = 2\Pi$. Note that the the autocorrelation function is not smooth. This is because there were some missing points in the data (corresponding to the plateaus of \autoref{fig:anti_exp}(b)) that were replaced by zeros to ensure correct mapping between current indices and current values. This can be noticed as well in \autoref{fig:per+phase}(b).
 
-Now, having found the period it is possible to precisely determine the phase of the signal. This is done via finding a global maximum of zero-lag correlation function  $\mathcal{R}_{\Delta f_r S}(0)$ of $\Delta f_r$ with a square wave $S(I, \Pi_{f_r}, \phi, D)$ signal having the same period but unknown phase $\phi$ and duty cycle $D$. An illustration of a meander function satisfying the optimal condition is presented in \autoref{fig:per+phase}(b) in orange. The phase $\phi$ (in $\mu$A) denotes the x-coordinate of the first point after the rising edge, and is marked with a triangle. The high and low levels of the square must be opposite in value, i.e. 1 and -1, and the absolute value does not matter. Generally, the idea behind this is to robustly detect sign changes that were shown back in \autoref{fig:anti_exp}(c). We can not rely on a more simple algorithm that walks through the points and marks where the function changes its sign because such algorithm will fail in the presence of a strong noise. Conversely, the optimization algorithm described above is not sensitive to local short-term sign changes.
+Now, having found the period it is possible to precisely determine the phase of the signal. This is done via finding a global maximum of zero-lag correlation function  $\mathcal{R}_{\Delta f_r S}(0)$ between $\Delta f_r$ and a square wave $S(I, \Pi, \phi, D)$ signal having the same period but unknown phase $\phi$ and duty cycle $D$. An illustration of a meander function satisfying the optimal condition is presented in \autoref{fig:per+phase}(b) in orange. The phase $\phi$ (in $\mu$A) denotes the x-coordinate of the first point after the rising edge, and is marked with a triangle. The high and low levels of the square must be opposite in value, i.e. 1 and -1, and the absolute value does not matter. Generally, the idea behind this is to robustly detect sign changes that were shown back in \autoref{fig:anti_exp}(c). We can not rely on a more simple algorithm that walks through the points and marks where the function changes its sign because such algorithm will fail in the presence of a strong noise. Conversely, the optimization algorithm described above is not sensitive to local short-term sign changes.
 
-The global optimal $\phi$ and $D$ are found using a brute force algorithm. It calculates the loss function $\mathcal{L} = - \mathcal{R}_{\Delta f_r S}(0)$ on a $50 \times 50$ grid of $(\phi, D)$ and takes the minimal value of all. It is feasible due to the evident boundaries on $\phi \in [-\Pi_{f_r}/2,\Pi_{f_r}/2)$ and $D \in [0, 1]$. The loss function topography for the avoided crossing patterns is nicely structured and for our example is shown in \autoref{fig:per+phase}(c). One can see that instead of a single minimum it has an area of the same minimal value. Again, the roots of this effect lie in the missing $f_r$ points. However, any value from this valley suits well enough for our purposes, and the algorithm finds no difficulty in locating it.
+The global optimal $\phi$ and $D$ are found using a brute force algorithm. It calculates the loss function $\mathcal{L} = - \mathcal{R}_{\Delta f_r S}(0)$ on a $50 \times 50$ grid of $(\phi, D)$ and takes the minimal value of all. It is feasible due to the evident boundaries on $\phi \in [-\Pi/2,\Pi/2)$ and $D \in [0, 1]$. The loss function topography for the avoided crossing patterns is nicely structured and for our example is shown in \autoref{fig:per+phase}(c). One can see that instead of a single minimum it has an area of the same minimal value. Again, the roots of this effect lie in the missing $f_r$ points. However, any value from this valley suits well enough for our purposes, and the algorithm finds no difficulty in locating it.
 
-With values for $\Pi_{f_r} = \Phi_0/M,\ \phi$ and $D$ we now can calculate the currents of the two transmon sweet spots in the case of the avoided crossings pattern:
+With values for $\Pi,\ \phi$ and $D$ we now can calculate the currents of the two transmon sweet spots in the case of the avoided crossings pattern:
 \begin{align}
-I^{max} &= \phi + \Pi_{f_r} \left(\frac{1+D}{2}\right) = \Phi_r /M ,\\
-I^{min} &= \phi + \Pi_{f_r} \left(\frac{D}{2}\right).
+I^{0} &= \phi + \Pi \left(\frac{1+D}{2}\right) ,\\
+I^{\frac{\pi}{2}} &= \phi + \Pi \left(\frac{D}{2}\right).
 \end{align}
-For the smooth dependences \autoref{fig:anti_theor}(b)-(c) the situation is opposite: $I^{max(min)} \rightarrow I^{min(max)}$. To distinguish the two cases when the noise is not large, it is enough to calculate the maximal differential of the frequency data and compare it to its peak-to-peak amplitude. For the avoided crossings these values are close and for the smooth curves they are not. However, in the presence of noise this indicator will fail, and we will have to resort to checking both current values for being $I_{max}$ based on the best fit among the two possibilities.
+Conversely, for the two other cases when the qubit spectrum lies entirely above or below the bare cavity frequency the situation is opposite: $I^{0(\frac{\pi}{2})} \rightarrow I^{\frac{\pi}{2}(0)}$. To distinguish between these two cases when the noise is not too large, it is enough to calculate the maximal absolute differential of the frequency data $\max_{i>0} |f_{r,i} - f_{{r,i}-1}|$ and compare it to the peak-to-peak amplitude $\max_{i,j} | f_{r,i} - f_{r, j}|$. For the avoided crossings these values are close and for the smooth curves they are not. However, in the presence of noise this indicator may fail, and one will have to check both current values as $I^0$ and choose based on the best fit among the two possibilities.
 
 
 \subsubsection{Full model fitting and testing}
@@ -237,76 +180,18 @@ For the smooth dependences \autoref{fig:anti_theor}(b)-(c) the situation is oppo
 \end{figure}
 
  
-Having performed the aforementioned preliminary steps, it is now possible to fit the full model to the extracted points. To do this, we employ brute force optimization combined with Nelder-Mead\cite{nelder1965} search. Firstly, we define the loss function for the problem as follows. For the known probe frequency span of the data $\Delta f_p$ (\autoref{fig:anti_exp}(a), whole y-axis) and the set of $N$ extracted points $\{p_i\} = \{(I_i, f_{r,i})\}$, we define the loss function per one point as
+Having performed the aforementioned preliminary steps, it is now possible to fit the full model to the extracted points. To do this, we employ brute force optimization combined with Nelder-Mead\cite{nelder1965} search. For both methods, we use a common loss function defined as follows. For the known probe frequency span of the data $\Delta f_p$ (\autoref{fig:anti_exp}(a), whole y-axis) and the set of $N$ extracted points $\{p_i\} = \{(I_i, f_{r,i})\}$, we calculate the loss function as
 \begin{align}
-\mathcal{L} &=  \frac{1}{N}\sum_{i=0}^N [f_i - \mathcal{M}(M I_i+\Phi_r,\ f_c,\ g,\ f_{ge}^{max},\ d)]^2,\label{eq:loss}\\
+\mathcal{L} &= \frac{1}{N}\sum_{i=0}^N [f_{r,i} - \mathcal{M}(I_i,\ \Pi, \ I^0,\ f_c,\ g,\ f_{ge}^{max},\ d)]^2,\label{eq:loss}\\
 \mathcal{M} &= \begin{cases}
 f_+,\  |f_+ - f_c|< \Delta f_p/2 \\
 f_-,\ \text{otherwise}, \label{eq:cond}
 \end{cases}
 \end{align}
-where, as in the previous section, $$f_{\pm} = f_{\pm}(M I_i + \Phi_r,\ f_c,\ g,\ f_{ge}^{max},\ d) = E_{\pm, 0} - E_{g,0}.$$
-The condition of Eq. \eqref{eq:cond} means that we choose only the frequencies that lie within a window $\Delta f_p$ around the model $f_r$ parameter. This ensures, firstly, that in the optimum we will not take any excess points outside the frequency scan, and, secondly, that we have a single model value for each current.
+where, as in the previous section, $$f_{\pm}(I_i) = f_{\pm}(I_i\,\ \Pi,\ I^0,\ \ f_c,\ g,\ f_{ge}^{max},\ d)$$
+The condition of Eq. \eqref{eq:cond} means that we choose only the frequencies that lie within a window $\Delta f_p$ around the model $f_c$ parameter. This ensures, firstly, that in the optimum we will not take any excess points outside the frequency scan, and, secondly, that we have a single model value for each current.
 
-To substantiate the choice of the optimization algorithms, we present in \autoref{fig:loss} three visualizations of the the defined loss function. The plots show how the function behaves if a certain pair of 6 model parameters is varied. From the plots it is obvious that it is ill-defined and has a lot of local minima which would impede robustness in real life applications. The $f^{max}_{ge}$ and $d$ parameters present the most significant difficulty in terms of false minima as can be seen from \autoref{fig:loss}(a). In contrast, $f_r$ presents the least difficulty, as can be seen from \autoref{fig:loss}(b). The last plot \autoref{fig:loss}(c) shows a very complex structure of the loss function and a very small-sized optimal valley and serves as an illustration of why the period and phase extraction is important.
-
-The brute force algorithm acts on the grid specified in \autoref{tab:grid}. The ranges in the grid are based on the usual design parameters of the modern qubit samples and the number of steps is chosen to be able to catch the optimal valley in the loss function. 
-
-After the coarse brute force optimization is done and the optimal valley is located, we apply the Nelder-Mead simplex downhill algorithm to polish the brute force result. This algorithm works very well in our case, as one can see from the \autoref{tab:grid} comparing the brute estimation and  the final result after Nelder-Mead is performed. The significant improvement in the loss value of the polished result compared to the brute estimation is due to the more accurate determination of the cavity frequency $f_c$ which leads as well to major shifts in optimal $g$, $f_{ge}^{max}$ and $d$.
-
-\begin{table}
-\centering
-\begin{ruledtabular}
-\begin{tabular}{ccccc} 
-Parameter & Value range & Steps \# & Brute est. & Final \\ 
-\hline
-$M$ & $\Phi_0/\Pi_{f_r}$ & 1 & 11.4 $\Phi_0$/mA &  same \\
-$\Phi_r$ & $M I^{max}$ & 1 & -0.13 $\Phi_0$ & same \\
-$f_c$ & $\langle f_r \rangle_{\Phi_e} \pm 1$ MHz & 3 & 6.5003 GHz & 6.5007 GHz\\
-$g$ & 20 - 40 MHz & 5 & 24 MHz & 36.1 MHz \\
-$f_{ge}^{max}$ &  4 - 12 GHz & 80 & 8 GHz & 8.9 GHz\\
-$d$& 0 - 0.9 & 9 & 0.5 & 0.08\\ 
-\end{tabular} 
-\end{ruledtabular}
-\caption{Grid specifications for the brute force algorithm and the resulting optimal points. The number of steps is taken with some margin to ensure correct location of the optimal valley even for difficult cases. The optimal parameters estimated by brute force and the final ones have the RMS loss values of 0.258 MHz and 0.024 MHz, respectively.}
-\label{tab:grid}
-\end{table}
-
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{fit}
-\caption{The result of the algorithm execution. (a) The data (blue dots) and the model (orange connected dots). (b) Residual error which is mostly random and is of order of 25 kHz per point .}
-\label{fig:anti_fit}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{noise_test}
-\caption{Behaviour of the algorithm on the data with the gaussian noise of varying noise power added. The clouds show standard deviations of optimal parameters after 50 tries, solid lines show mean values. The algorithm is very stable above SNR=8 but is still robust at detecting avoided crossings down to SNR=3-4 but with reduced accuracy in $f_{ge}^{max}$, $g$ and $d$. Other three parameters are still very accurate.}
-\label{fig:noise_test}
-\end{figure}
-
-Finally, the resulting fit is presented in \autoref{fig:anti_fit} along with the plot of the residuals. The match is almost perfect, and the noise in the residuals is random and thus shows no systematic errors. In \autoref{fig:noise_test} we also present the fitting results for different powers of added noise. The signal-to-noise ratio (SNR) is defined for our data in a similar manner as the SNR in the resonator fitting tests\cite{probst2015}; we take distance $2r$ between two maximally remote points of $S_{21}(f_p, \Phi_e)$ among any pair on the complex plane (i.e., the diameter of the resonance circle) as the signal amplitude, and the noise of the form $\frac{\xi_1+i\xi_2}{\sqrt 2}$, where $\xi_1,\ \xi_2$ distributed normally with zero mean and variance (amplitude) $\sigma$. The SNR then is defined as $r/\sigma$. As one can see from the graph, the algorithm stays robust even at very low SNRs that are even lower than the low limit SNRs for the \textit{circlefit} stability. This is possible because a fallback strategy of taking the smallest amplitude point as the resonance is applied when \textit{circlefit} fails. Ultimately, the key point of this stress test is to show that the algorithm can be applied in real-life scenarios when the data may be of low quality.
-
-The fitting algorithm was implemented in Python using brute and Nelder-Mead routines from Scipy. The fitting example above runs for 3.2 seconds on a 5-year old Intel Core i5-3337U CPU, from which 2.7 seconds are for the brute and 0.4 of a second is for the Nelder-Mead minimization. On a contemporary Intel Core i7-7700 CPU, it takes about one second to run the whole procedure. The time costs mostly come from the square root calculation necessary for Eqs. \eqref{eq:tr_levels} and \eqref{eq:branches2} and because that the brute routine is not parallelized. However, this is still fast, firstly, because recording a resonator spectrum such as one in the example takes around 20 seconds, and, secondly, it is much faster than a human would do. 
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{fit_other_cases}
-\caption{Fitting two other samples of our dataset presenting other two possible cases (blue dots are data, orange connected dots are the model). (a) The qubit is entirely above the resonator. Per-point RMS error is 60 kHz. (b) The qubit is below the resonator. Error is 150 kHz (larger due to the proportionally larger amplitude of the frequency variation).}
-\label{fit-other-cases}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{alternative_fits}
-\caption{(a) Two alternative fits (orange and green lines) for the same data (blue dots). The corresponding parameters $f_c,\ g,\ f_{ge}^{max}, d$ for the two alternative fits are in shown the legend. (b) Residuals for the two fits, in orange (qubit below) and green (qubit above). RMS errors are 14 kHz and 11 kHz, respectively.}
-\label{fig:alternative-fits}
-\end{figure}
-
-We have tested the algorithm on more than 100 real spectra that we have in our experimental database, and it finds an optimum for any kind of the dependence of the resonance on the flux caused by various dispositions of the qubit and the resonator, as in \autoref{fig:anti_theor}. Example fitting results for the variants in \autoref{fig:anti_theor}(b,c) are provided in \autoref{fit-other-cases}. There is a caveat, however, in some of such cases. It turns out, that for large qubit-cavity detunings two different sets of parameters minimizing the loss function equally well are possible. An illustration for this statement can be seen in \autoref{fig:alternative-fits}(a),(b). The algorithm was launched using different grid ranges for $f_q^{max}$. In one case (orange) the search was done below, and in the other (green) above the mean resonance frequency $\langle f_c\rangle_{\Phi_e}$. The resulting fits are equally accurate, and without other information about the system it would not be possible to choose between the two. Therefore, some hints should be passed to the algorithm to avoid ambiguity; for instance, whether to look for the qubit above or below the resonator. Otherwise, it would be necessary to check both possibilities with other methods, i.e. via two-tone spectroscopy.
+To substantiate the choice of the optimization algorithms, we present in \autoref{fig:loss} three visualizations of the the defined loss function. The plots show how the function behaves if a certain pair of 6 model parameters is varied. From the plots it is obvious that it is ill-defined and has a lot of local minima which would impede robustness in real life applications. The $f^{max}_{ge}$ and $d$ parameters present the most significant difficulty in terms of false minima as can be seen from \autoref{fig:loss}(a). In contrast, $f_c$ presents the least difficulty, as can be seen from \autoref{fig:loss}(b). The last plot \autoref{fig:loss}(c) shows a very complex structure of the loss function and a very small-sized optimal valley and serves as an illustration of why the period and phase extraction is important.
 
 
 \subsection{Analysing qubit spectra}
@@ -412,6 +297,167 @@ First brute force is done with a wide frequency band $\Delta f$=100 MHz around i
 \end{table}
 
 
+
+
+
+
+\section{Results}
+
+\subsection{Resonator spectra}
+
+The brute force algorithm acts on the grid specified in \autoref{tab:grid}. The ranges in the grid are based on the usual design parameters of the modern qubit samples and the number of steps is chosen to be able to catch the optimal valley in the loss function. 
+
+After the coarse brute force optimization is done and the optimal valley is located, we apply the Nelder-Mead simplex downhill algorithm to polish the brute force result. This algorithm works very well in our case, as one can see from the \autoref{tab:grid} comparing the brute estimation and  the final result after Nelder-Mead is performed. The significant improvement in the loss value of the polished result compared to the brute estimation is due to the more accurate determination of the cavity frequency $f_c$ which leads as well to major shifts in optimal $g$, $f_{ge}^{max}$ and $d$.
+
+
+Finally, the resulting fit is presented in \autoref{fig:anti_fit} along with the plot of the residuals. The match is almost perfect, and the noise in the residuals is random and thus shows no systematic errors. In \autoref{fig:noise_test} we also present the fitting results for different powers of added noise. The signal-to-noise ratio (SNR) is defined for our data in a similar manner as the SNR in the resonator fitting tests\cite{probst2015}; we take distance $2r$ between two maximally remote points of $S_{21}(f_p, \Phi_e)$ among any pair on the complex plane (i.e., the diameter of the resonance circle) as the signal amplitude, and the noise of the form $\frac{\xi_1+i\xi_2}{\sqrt 2}$, where $\xi_1,\ \xi_2$ distributed normally with zero mean and variance (amplitude) $\sigma$. The SNR then is defined as $r/\sigma$. As one can see from the graph, the algorithm stays robust even at very low SNRs that are even lower than the low limit SNRs for the \textit{circlefit} stability. This is possible because a fallback strategy of taking the smallest amplitude point as the resonance is applied when \textit{circlefit} fails. Ultimately, the key point of this stress test is to show that the algorithm can be applied in real-life scenarios when the data may be of low quality.
+
+
+\begin{table}
+	\centering
+	\begin{ruledtabular}
+		\begin{tabular}{ccccc} 
+			Parameter & Value range & Steps \# & Brute est. & Final \\ 
+			\hline
+			$M$ & $\Phi_0/\Pi_{f_r}$ & 1 & 11.4 $\Phi_0$/mA &  same \\
+			$\Phi_r$ & $M I^{max}$ & 1 & -0.13 $\Phi_0$ & same \\
+			$f_c$ & $\langle f_r \rangle_{I} \pm 1$ MHz & 3 & 6.5003 GHz & 6.5007 GHz\\
+			$g$ & 20 - 40 MHz & 5 & 24 MHz & 36.1 MHz \\
+			$f_{ge}^{max}$ &  4 - 12 GHz & 80 & 8 GHz & 8.9 GHz\\
+			$d$& 0 - 0.9 & 9 & 0.5 & 0.08\\ 
+		\end{tabular} 
+	\end{ruledtabular}
+	\caption{Grid specifications for the brute force algorithm and the resulting optimal points. The number of steps is taken with some margin to ensure correct location of the optimal valley even for difficult cases. The optimal parameters estimated by brute force and the final ones have the RMS loss values of 0.258 MHz and 0.024 MHz, respectively.}
+	\label{tab:grid}
+\end{table}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{fit}
+	\caption{The result of the algorithm execution. (a) The data (blue dots) and the model (orange connected dots). (b) Residual error which is mostly random and is of order of 25 kHz per point .}
+	\label{fig:anti_fit}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{noise_test}
+	\caption{Behaviour of the algorithm on the data with the gaussian noise of varying noise power added. The clouds show standard deviations of optimal parameters after 50 tries, solid lines show mean values. The algorithm is very stable above SNR=8 but is still robust at detecting avoided crossings down to SNR=3-4 but with reduced accuracy in $f_{ge}^{max}$, $g$ and $d$. Other three parameters are still very accurate.}
+	\label{fig:noise_test}
+\end{figure}
+The fitting algorithm was implemented in Python using brute and Nelder-Mead routines from Scipy. The fitting example above runs for 3.2 seconds on a 5-year old Intel Core i5-3337U CPU, from which 2.7 seconds are for the brute and 0.4 of a second is for the Nelder-Mead minimization. On a contemporary Intel Core i7-7700 CPU, it takes about one second to run the whole procedure. The time costs mostly come from the square root calculation necessary for Eqs. \eqref{eq:tr_levels} and \eqref{eq:branches2} and because that the brute routine is not parallelized. However, this is still fast, firstly, because recording a resonator spectrum such as one in the example takes around 20 seconds, and, secondly, it is much faster than a human would do. 
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{fit_other_cases}
+	\caption{Fitting two other samples of our dataset presenting other two possible cases (blue dots are data, orange connected dots are the model). (a) The qubit is entirely above the resonator. Per-point RMS error is 60 kHz. (b) The qubit is below the resonator. Error is 150 kHz (larger due to the proportionally larger amplitude of the frequency variation).}
+	\label{fit-other-cases}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{alternative_fits}
+	\caption{(a) Two alternative fits (orange and green lines) for the same data (blue dots). The corresponding parameters $f_c,\ g,\ f_{ge}^{max}, d$ for the two alternative fits are in shown the legend. (b) Residuals for the two fits, in orange (qubit below) and green (qubit above). RMS errors are 14 kHz and 11 kHz, respectively.}
+	\label{fig:alternative-fits}
+\end{figure}
+
+We have tested the algorithm on more than 100 real spectra that we have in our experimental database, and it finds an optimum for any kind of the dependence of the resonance on the flux caused by various dispositions of the qubit and the resonator, as in \autoref{fig:anti_theor}. Example fitting results for the variants in \autoref{fig:anti_theor}(b,c) are provided in \autoref{fit-other-cases}. There is a caveat, however, in some of such cases. It turns out, that for large qubit-cavity detunings two different sets of parameters minimizing the loss function equally well are possible. An illustration for this statement can be seen in \autoref{fig:alternative-fits}(a),(b). The algorithm was launched using different grid ranges for $f_q^{max}$. In one case (orange) the search was done below, and in the other (green) above the mean resonance frequency $\langle f_c\rangle_{I}$. The resulting fits are equally accurate, and without other information about the system it would not be possible to choose between the two. Therefore, some hints should be passed to the algorithm to avoid ambiguity; for instance, whether to look for the qubit above or below the resonator. Otherwise, it would be necessary to check both possibilities with other methods, i.e. via two-tone spectroscopy.
+
+\section{Discussion}
+
+
+
+\appendix
+
+
+
+\section{Transmon Hamiltonian}\label{sec:transmon}
+
+The simplest version of this qubit consists of a Josephson junction shunted with a large capacitor. Flux tunability of the frequency is attained by replacing a single Josephson junction with a SQUID as in \autoref{fig:trans}(a) and applying external magnetic flux $\Phi_e$ to its loop. This configuration can be equivalently represented with a shunted junction of tunable energy, \autoref{fig:trans}(b). The Hamiltonian for such equivalent circuit is as follows: 
+\begin{equation}
+\hat{H}_{tr} = 4E_C \hat n^2 - E_J(\Phi_e) \cos \hat\varphi,
+\label{eq:tr_ham}
+\end{equation}
+where $E_{J1,2}$ are the Josephson energies , $E_C = e^2/2C_{\Sigma}$, $C_{\Sigma} = C_s + C_1 +C_2$, is the charging energy, $\hat n$ and $\hat \varphi$ are the operators for the Cooper pair number and the phase of the qubit island. For the equivalent Josephson energy $E_{J}$ one obtains
+\begin{equation}
+E_{J}(\Phi_e) = E_{J\Sigma}\cos\left(\pi \Phi_e/\Phi_0\right) \sqrt{1+d^2 \tan^2 \left(\pi \Phi_e/\Phi_0\right)},
+\label{eq:EJ_Phie}
+\end{equation}  
+where $E_{J\Sigma} = E_{J1}+E_{J2}$, $d = \frac{E_{J1}-E_{J2}}{E_{J1}+E_{J2}}$ is the asymmetry of the SQUID. As one can notice, the dependence is periodic in $\Phi_e$.
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{transmon}
+	\caption{(a) A tunable transmon circuit with an asymmetric SQUID, $E_{J1} \neq E_{J2}$. (b) Equivalent transmon with tunable energy $E_{J}(\Phi_e)$ and unified capacitance $C_{\Sigma}$. The qubit island containing its single degree of freedom is in blue.}
+	\label{fig:trans}
+\end{figure}
+\begin{table}
+	\centering
+	\begin{tabular}{l|c}
+		Level & Energy\\
+		\hline
+		$g\ (E_0)$ & 0\\
+		$e\ (E_1)$ & $\sqrt{8E_J E_C} - E_C$\\
+		$f\ (E_2)$ & $2\sqrt{8E_J E_C} - 3 E_C$\\
+		$d\ (E_3)$ & $3\sqrt{8E_J E_C} - 6 E_C$\\
+		$E_4$ & $4\sqrt{8E_J E_C} - 10 E_C$\\
+		\hline
+	\end{tabular}\quad
+	\begin{tabular}{l|c}
+		Transition & Frequency\\
+		\hline
+		$ge$ & $\omega_{ge}$ \\
+		$gf/2$ & $\omega_{ge} - 0.5 E_C$\\
+		$ef$, $gd/3$& $\omega_{ge}-E_C$\\
+		$ed/2$ & $\omega_{ge} - 1.5 E_C$\\
+		$fd$, $e E_4/3$ & $\omega_{ge}-2 E_C$\\
+		\hline
+	\end{tabular}
+	\caption{Energies and some transition (single and multi-photon) frequencies for the first 5 levels of the transmon calculated with \eqref{eq:tr_levels}.}
+	\label{tab:tr_transitions}
+\end{table}
+It is also possible to derive analytical expressions for the energy levels and transition frequencies for this type of qubits. The energy of the $m$\textsuperscript{th} level is \cite{koch2007}
+\begin{equation}
+E_m = m \sqrt{8E_J(\Phi_e) E_C} -\frac{E_C}{12}(6m^2+6m),
+\label{eq:tr_levels}
+\end{equation}
+and some of the transition frequencies are presented in \autoref{tab:tr_transitions}. The qubit frequency  may be approximated as 
+\begin{equation}
+\begin{aligned}
+f_{ge}(\Phi_e) &\approx \sqrt{8 E_J (\Phi_e) E_C} \\
+&= f_{ge}^{max} \sqrt{\cos\left(\pi \Phi_e/\Phi_0\right) \sqrt{1+d^2 \tan^2 \left(\pi \Phi_e/\Phi_0\right)}},
+\end{aligned}
+\end{equation}
+where $f_{ge}^{max} = \sqrt{8 E_J(0) E_C}$. This simplifies the expression for the frequency since now it depends on two parameters instead of three.
+
+One final note is that in real-life applications is not possible to know directly the flux $\Phi_e$ that is threaded through the SQUID. The experimenter usually knows only the current $I$ (or voltage) which he applies to some coil that is connected inductively to the SQUID. Then $\Phi_e = M I + \Phi_r$, where $M$ stands for the mutual inductance of the coil and the SQUID, and $\Phi_r$ is some residual flux inherent to the sample.
+
+\section{Circuit QED}\label{sec:cqed}
+
+
+\begin{figure*}
+	\centering
+	\includegraphics[width=\textwidth]{anti_theor}
+	\caption{Frequency spectrum of the transmon-resonator system. Parameters used: $f_{ge}(0) \approx \sqrt{8E_C E_J(0)}/2\pi = 8.5$ GHz, $d=0.3$, $f_r=6.4$ GHz, $g = 30$ MHz. For each subplot two transition branches  $f_{\pm} = (E_{\pm,0} - E_{g,0})/2\pi$ are shown (orange and blue, respectively) both forming the resonator and qubit lines. As one can notice, there are three qualitatively different cases of the resonator-qubit disposition. Lower row shows a zoomed area around $f_c$ that looks differently in each case.}
+	\label{fig:anti_theor}
+\end{figure*}
+
+The readout of the superconducting qubits is now predominantly done using an ancilla system which is usually implemented as a superconducting microwave resonator which acts as an electromagnetic cavity in the standard cavity QED. Truncating the qubit to two levels, one may obtain the following Hamiltonian for the compound cavity-qubit system (in RWA):
+\begin{equation}
+\hat H/h = \frac{f_q}{2} \hat \sigma_z + f_c \hat a^\dagger \hat a + g(\hat \sigma^- \hat a^\dagger + \hat \sigma^+ \hat a),
+\end{equation}
+where $f_q$ is the qubit frequency, $f_c$ is the cavity frequency and $g$ is the coupling strength. As long as the RWA is done, this Hamiltonian may be diagonalized analytically\cite{blais2004}:
+\begin{align}
+E_{g, 0}/h &= \frac{f_c - f_q}{2},\label{eq:branches1}
+\\
+E_{\pm, n}/h &= (n+1)f_c \pm \frac{1}{2}\sqrt{4g^2(n+1)+(f_q-f_c)^2}.
+\label{eq:branches2}
+\end{align}
+
+This is very convenient for our purposes. By substituting the dependence of the qubit frequency $f_q \equiv f_{ge}(\Phi_e)$ into these equations, we can get straightforwardly the full system spectrum in dependence on the magnetic flux. In \autoref{fig:anti_theor} we have used the equations \eqref{eq:tr_levels}, \eqref{eq:branches1} and \eqref{eq:branches2} to model a tunable transmon interacting with a cavity for various $\Phi_e$ and various $f_{ge}^{max},\ d$. In the lower row of the figure, one can see that it is possible to extract the dependence of the \textit{cavity} frequency $f_c$ on $\Phi_e$; for example, the well-known avoided crossing pattern can be directly observed in \autoref{fig:anti_theor}(a), and the other two possible behaviours for the qubit entirely above or below the resonator in \autoref{fig:anti_theor}(b),(c). To shorten the notation, in the following we will define the corresponding branch frequencies of \eqref{eq:branches2} as $f_{\pm} = ( E_{\pm,0}-E_{g,0})/2\pi$.
+
+In \autoref{fig:anti_theor}(a) it is also possible to see the entire spectrum of a transmon $ge$ transition predicted by equations \eqref{eq:EJ_Phie}, \eqref{eq:tr_levels}. It has a cosine-like periodic shape with a period of one flux quantum $\Phi_0$. Consequently, it has two extrema, the upper and the lower which are called ``sweet spots'' due to the first-order insensitivity to $\Phi_e$, and thus to possible flux noise. In the following, by saying sweet spot we will assume the upper one whose frequency is $f_{ge}(\Phi_e = 0) \equiv f^{max}_{ge}$ .
+
+We will use the model \eqref{eq:branches1}, \eqref{eq:branches2} to fit the resonator frequency that we can find in an experiment. The only conceptual problem for the fitting that is left now is that the function we want to use as a model is not single-valued. Indeed, in \autoref{fig:anti_theor}(a, top) for each value of magnetic flux we always find two frequency points corresponding to the qubit and to the resonator, respectively. However, in practice only a narrow scan around the resonator frequency such as in \autoref{fig:anti_theor}(a, bottom) is required, and thus no ambiguity occurs. 
 
 \bibliography{aipsamp}% Produces the bibliography via BibTeX.
 
