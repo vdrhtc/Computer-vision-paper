@@ -44,6 +44,7 @@
 \usepackage{mathptmx}
 \usepackage{amsmath}
 \usepackage{multirow}
+\usepackage{makecell}
 \graphicspath{{Pictures/}}
 \begin{document}
 
@@ -109,13 +110,13 @@ where $f_c$ stands for current-independent bare cavity frequency. Here we note t
 For the two-tone spectroscopy, we take the dependence of the qubit transitions on current $f_{ge, gf/2, ef}(I)$ are expressed as
 \begin{equation}
 \begin{gathered}
-f_{ge}(I) = f_{ge}^{max} \left[\cos^2\left(\frac{\pi(I-I^0)}{\Pi}\right)+d^2 \sin^2 \left(\frac{\pi(I-I^0)}{\Pi}\right)\right]^\frac{1}{4}, \\
+f_{ge}(I) = f_{ge}^{max} \left[\cos^2\left(\frac{\pi(I-I_{ss})}{\Pi}\right)+d^2 \sin^2 \left(\frac{\pi(I-I_{ss})}{\Pi}\right)\right]^\frac{1}{4}, \\
 f_{gf/2} = f_{ge} + \alpha/2,\ f_{ef}=f_{ge} + \alpha
-\end{gathered}
+\end{gathered}\label{eq:tr_spectrum}
 \end{equation}
-where $\Phi_0$ is the flux quantum, $d$ is the SQUID asymmetry, $\alpha$ is the anharmonicity of the transmon equal to it's negative charging energy $-E_C$, and $f_{ge}^{max}$ is the qubit frequency at $I = I^0$; $I^0$ is current exactly compensating the non-zero residual flux that is always present in experiment and coming from the local magnetic fields on the chip; we will additionally use $I^{\frac{\pi}{2}}$ to denote the current of minimum frequency. Finally, $\Pi$ is the period of the spectrum in current.
+where $\Phi_0$ is the flux quantum, $d$ is the SQUID asymmetry, $\alpha$ is the anharmonicity of the transmon equal to it's negative charging energy $-E_C$, and $f_{ge}^{max}$ is the qubit frequency at $I = I_{ss}$; $I_{ss}$ is current exactly compensating the non-zero residual flux that is always present in experiment and coming from the local magnetic fields on the chip (sweet-spot current). Finally, $\Pi$ is the period of the spectrum in current.
 
-In overall, we have 6 fitting parameters for the single-tone spectroscopy ($f_c$, $g$, $\Pi$, $I^0$, $f_{ge}^{max}$, $d$) and  5 parameters for the two-tone ($\Pi$, $I^0$, $f_{ge}^{max}$, $d$, $\alpha$).
+In overall, we have 6 fitting parameters for the single-tone spectroscopy ($f_c$, $g$, $\Pi$, $I_{ss}$, $f_{ge}^{max}$, $d$) and  5 parameters for the two-tone ($\Pi$, $I_{ss}$, $f_{ge}^{max}$, $d$, $\alpha$).
 
 Finally, the structure of the rest of the paper is as follows. First, we will describe our fitting method for the STS data; then, we will cover the algorithm to detect qubit spectral lines on TTS data. Finally, the fitting accuracy, performance and reliability of both procedures will be assessed.
 
@@ -135,7 +136,7 @@ In the real life applications, the spectrum of the resonator is usually recorded
 \label{fig:anti_exp}
 \end{figure}
 
-Fiting the image shown \autoref{fig:anti_exp}(a) with the model equations \eqref{eq:f_r} is not a trivial task because it belongs to a class of optimization problems where the loss function (i.e. in the least squares algorithm) is ill-defined. This is due to the periodic dependence of the frequencies on current $I$ and unknown position of the qubit sweet spot $I^0$ due to the local residual flux. Fortunately, it is possible to get a good initial guess for these parameters and then brute force the solution in other variables since we have a well defined bounds for each of the variables left. Finally, we can polish the result in all six parameters using a Nelder-Mead search.
+Fiting the image shown \autoref{fig:anti_exp}(a) with the model equations \eqref{eq:f_r} is not a trivial task because it belongs to a class of optimization problems where the loss function (i.e. in the least squares algorithm) is ill-defined. This is due to the periodic dependence of the frequencies on current $I$ and unknown position of the qubit sweet spot $I_{ss}$ due to the local residual flux. Fortunately, it is possible to get a good initial guess for these parameters and then brute force the solution in other variables since we have a well defined bounds for each of the variables left. Finally, we can polish the result in all six parameters using a Nelder-Mead search.
 
 The outline of the method which uses \autoref{fig:anti_exp}(a) as an example is presented below. The chosen type of the resonator-qubit arrangement which yields the avoided crossing pattern is not universal: there are two other cases when the qubit spectrum lies entirely below or above the resonator frequency, however, they are treated exactly the same way and are simpler in terms of the loss function behaviour at all steps of our algorithm.
 
@@ -154,7 +155,7 @@ The resulting plot of extracted frequency is shown in \autoref{fig:anti_exp}(c) 
 \caption{Period and phase extraction procedure. (a) Autocorrelation function depending on the lag $\Delta I$ shows a prominent local maximum at $88\ \mu$A (orange dot). (b) Construction for phase estimation; $\Delta f_r = f_r-\langle f_r \rangle_{I}$ (blue) is fitted with a square wave (orange, start marked with a triangle). Vertical bars mark candidate sweet spots. (c) Loss function (normalized) for the square wave fitting procedure from (b); red cross indicates the parameters of the meander shown there.}
 \label{fig:per+phase}
 \end{figure}
-As we have said above, one of the serious obstacles for the fitting is that the periodicity of the data on one of the fitting parameters. Along with the equally unknown phase of the signal, this leads to the presence of many local minima in the loss function which severely impede the progress of iterative optimization algorithms. In other words, the unknown parameters $\Pi$ and $I^0$ are preventing us to find reliably the global minimum we need. Fortunately, it is possible to find the period and the sweep spot location (or, the phase of the data) without fitting the full model \eqref{eq:f_r} which alleviates the stated problem. In the absence of noise, this would be a trivial task. However, in the real-life conditions the noise to some extent is always present, so below we engineer a solution that is insensitive to local sporadic perturbations of the data.
+As we have said above, one of the serious obstacles for the fitting is that the periodicity of the data on one of the fitting parameters. Along with the equally unknown phase of the signal, this leads to the presence of many local minima in the loss function which severely impede the progress of iterative optimization algorithms. In other words, the unknown parameters $\Pi$ and $I_{ss}$ are preventing us to find reliably the global minimum we need. Fortunately, it is possible to find the period and the sweep spot location (or, the phase of the data) without fitting the full model \eqref{eq:f_r} which alleviates the stated problem. In the absence of noise, this would be a trivial task. However, in the real-life conditions the noise to some extent is always present, so below we engineer a solution that is insensitive to local sporadic perturbations of the data.
 
 A powerful tool for finding the period in a given dataset $y$ especially when it contains just a few periods is the autocorrelation function $\mathcal{R}_{y y}(l) = \sum_n y_n y_{n-l}$. The location of the largest of its local maxima (except for the $l=0$) equals exactly the sought period. However, this is only true when the mean value of the function is zero; otherwise, $\mathcal{R}_{y y}(l)$ would be linear with a very steep slope smearing out all the extrema. Therefore, instead of directly calculating the autocorrelation of $f_r (I)$ we consider the function $\Delta f_r (I)$ introduced above which has zero mean and the same period. For this function, which looks exactly like one from \autoref{fig:anti_exp}(c) but centered vertically around zero, the autocorrelation function $\mathcal{R}_{\Delta f_r \Delta f_r}(\Delta I)$ is shown in \autoref{fig:per+phase}(a). As one can see, it depends on the current offset $\Delta I$ which spans 200 $\mu$A just as the data itself. This means that the data is being zero-padded at all $\Delta I$ except for $\Delta I = 0$, and this is why we get a diminishing value of the correlation peaks when the lag reaches $\Pi$ or $2\Pi$. The orange dot in the plot shows the highest local extremum of $\mathcal{R}_{\Delta f_r \Delta f_r}(\Delta I)$ at 88 $\mu$A. It is a very prominent peak and can be easily distinguished among all others. There is as well a small peak at 176 $\mu$A which corresponds to $\Delta I = 2\Pi$. Note that the the autocorrelation function is not smooth. This is because there were some missing points in the data (corresponding to the plateaus of \autoref{fig:anti_exp}(b)) that were replaced by zeros to ensure correct mapping between current indices and current values. This can be noticed as well in \autoref{fig:per+phase}(b).
 
@@ -162,15 +163,18 @@ Now, having found the period it is possible to precisely determine the phase of 
 
 The global optimal $\phi$ and $D$ are found using a brute force algorithm. It calculates the loss function $\mathcal{L} = - \mathcal{R}_{\Delta f_r S}(0)$ on a $50 \times 50$ grid of $(\phi, D)$ and takes the minimal value of all. It is feasible due to the evident boundaries on $\phi \in [-\Pi/2,\Pi/2)$ and $D \in [0, 1]$. The loss function topography for the avoided crossing patterns is nicely structured and for our example is shown in \autoref{fig:per+phase}(c). One can see that instead of a single minimum it has an area of the same minimal value. Again, the roots of this effect lie in the missing $f_r$ points. However, any value from this valley suits well enough for our purposes, and the algorithm finds no difficulty in locating it.
 
-With values for $\Pi,\ \phi$ and $D$ we now can calculate the currents of the two transmon sweet spots in the case of the avoided crossings pattern:
+With values for $\Pi,\ \phi$ and $D$ we now can calculate the currents of the transmon sweet spots in the case of the avoided crossings pattern and the smooth patterns:
 \begin{align}
-I^{0} &= \phi + \Pi \left(\frac{1+D}{2}\right) ,\\
-I^{\frac{\pi}{2}} &= \phi + \Pi \left(\frac{D}{2}\right).
+I_{ss} = 
+\begin{cases}
+ \phi + \Pi (1+D)/2,\ \text{for avoided crossings}\\
+ \phi + \Pi D/2 ,\ \text{otherwise}
+\end{cases}
 \end{align}
-Conversely, for the two other cases when the qubit spectrum lies entirely above or below the bare cavity frequency the situation is opposite: $I^{0(\frac{\pi}{2})} \rightarrow I^{\frac{\pi}{2}(0)}$. To distinguish between these two cases when the noise is not too large, it is enough to calculate the maximal absolute differential of the frequency data $\max_{i>0} |f_{r,i} - f_{{r,i}-1}|$ and compare it to the peak-to-peak amplitude $\max_{i,j} | f_{r,i} - f_{r, j}|$. For the avoided crossings these values are close and for the smooth curves they are not. However, in the presence of noise this indicator may fail, and one will have to check both current values as $I^0$ and choose based on the best fit among the two possibilities.
+To distinguish between these two cases when the noise is not too large, it is enough to calculate the maximal absolute differential of the frequency data $\max_{i>0} |f_{r,i} - f_{{r,i}-1}|$ and compare it to the peak-to-peak amplitude $\max_{i,j} | f_{r,i} - f_{r, j}|$. For the avoided crossings these values are close and for the smooth curves they are not. However, in the presence of noise this indicator may fail, and one will have to check both current values to be $I_{ss}$ and choose based on the best fit among the two possibilities.
 
 
-\subsubsection{Full model fitting and testing}
+\subsubsection{Full model fitting}
 
 \begin{figure}
 \centering
@@ -182,13 +186,13 @@ Conversely, for the two other cases when the qubit spectrum lies entirely above 
  
 Having performed the aforementioned preliminary steps, it is now possible to fit the full model to the extracted points. To do this, we employ brute force optimization combined with Nelder-Mead\cite{nelder1965} search. For both methods, we use a common loss function defined as follows. For the known probe frequency span of the data $\Delta f_p$ (\autoref{fig:anti_exp}(a), whole y-axis) and the set of $N$ extracted points $\{p_i\} = \{(I_i, f_{r,i})\}$, we calculate the loss function as
 \begin{align}
-\mathcal{L} &= \frac{1}{N}\sum_{i=0}^N [f_{r,i} - \mathcal{M}(I_i,\ \Pi, \ I^0,\ f_c,\ g,\ f_{ge}^{max},\ d)]^2,\label{eq:loss}\\
+\mathcal{L} &= \frac{1}{N}\sum_{i=0}^N [f_{r,i} - \mathcal{M}(I_i,\ \Pi, \ I_{ss},\ f_c,\ g,\ f_{ge}^{max},\ d)]^2,\label{eq:loss}\\
 \mathcal{M} &= \begin{cases}
 f_+,\  |f_+ - f_c|< \Delta f_p/2 \\
 f_-,\ \text{otherwise}, \label{eq:cond}
 \end{cases}
 \end{align}
-where, as in the previous section, $$f_{\pm}(I_i) = f_{\pm}(I_i\,\ \Pi,\ I^0,\ \ f_c,\ g,\ f_{ge}^{max},\ d)$$
+where, as in the previous section, $$f_{\pm}(I_i) = f_{\pm}(I_i\,\ \Pi,\ I_{ss},\ \ f_c,\ g,\ f_{ge}^{max},\ d)$$
 The condition of Eq. \eqref{eq:cond} means that we choose only the frequencies that lie within a window $\Delta f_p$ around the model $f_c$ parameter. This ensures, firstly, that in the optimum we will not take any excess points outside the frequency scan, and, secondly, that we have a single model value for each current.
 
 To substantiate the choice of the optimization algorithms, we present in \autoref{fig:loss} three visualizations of the the defined loss function. The plots show how the function behaves if a certain pair of 6 model parameters is varied. From the plots it is obvious that it is ill-defined and has a lot of local minima which would impede robustness in real life applications. The $f^{max}_{ge}$ and $d$ parameters present the most significant difficulty in terms of false minima as can be seen from \autoref{fig:loss}(a). In contrast, $f_c$ presents the least difficulty, as can be seen from \autoref{fig:loss}(b). The last plot \autoref{fig:loss}(c) shows a very complex structure of the loss function and a very small-sized optimal valley and serves as an illustration of why the period and phase extraction is important.
@@ -202,7 +206,7 @@ Unfortunately, the resonator fitting procedure accuracy in terms of the qubit fr
 \begin{figure}[b]
 	\centering
 	\includegraphics[width=\linewidth]{twotone}
-	\caption{Two types of spectroscopy results side by side; the colorbar is common, coil current scan range is the same. (a) Single-tone spectroscopy (one period on $\Phi_{e}$). (b) Two-tone spectroscopy result. Clear flux-dependent transmon transitions are visible ($ge$ and $gf/2$), and some fixed-frequency resonator excitations are present as well. Red vertical stripes are observed when the qubit and the cavity are close to resonance.}
+	\caption{Two types of spectroscopy results side by side; the colorbar is common, coil current scan range is the same. (a) Single-tone spectroscopy (one period on $I$). (b) Two-tone spectroscopy result. Clear flux-dependent transmon transitions are visible ($ge$ and $gf/2$), and some fixed-frequency resonator excitations are present as well. Red vertical stripes are observed when the qubit and the cavity are close to resonance.}
 	\label{fig:twotone}
 \end{figure}
 
@@ -221,13 +225,13 @@ The presence of several bright lines along with noise makes it in general imposs
 
 Similar to the reasoning in \autoref{sec:extract_fr}, the first thing to do is to reduce the three-dimensional picture \autoref{fig:twotone} to two dimensions. This is done in several steps.
 
-First, we calculate the mean transmission $\langle S_{21}\rangle_{f_{exc}} (\Phi_{e})$ for each current value. This operation gives us the background dependent only on $\Phi_e$ and not on  $ f_{exc} $. This background can be then subtracted from the data, and the absolute value of the difference $ Z = \left| S_{21} - \langle S_{21}\rangle_{f_{exc}} \right |$ may be then plotted. For the example, the resulting image can be seen in \autoref{fig:extract_points}. As one can notice, the background subtraction removes most of the vertical stripes that could be seen in \autoref{fig:twotone}(b).
+First, we calculate the median absolute transmission $\text{median} [S_{21}]_{f_{exc}} (I)$ for each current value (or frequency column). It gives us the background dependent only on $I$ and not on  $ f_{exc} $ which can be then subtracted from the data; then, the absolute value of the difference $ Z = \left| S_{21} - \text{median} [S_{21}]_{f_{exc}} \right |$ may be plotted. The subtraction both removes the background and in each data column and highlights the points that are distinct in either amplitude or phase. For our example, the resulting image can be seen in \autoref{fig:extract_points}. As one can notice, the background subtraction removes most of the vertical stripes that were present in \autoref{fig:twotone}(b).
 
 Next, the data points may be extracted to form a 2D point array where the qubit lines may be searched for. This procedure is done in several steps. First of all, it is necessary to do thresholding of the data to obtain a binary image. We have tested various thresholding methods, i.e. Otsu's method\cite{otsu1979}; however, the best performance in distinguishing local peaks from background was obtained using another method that is based on estimating the noise in the data. We estimate noise level $\sigma$ by calculating the numerical difference between adjacent points in a row for each flux value, and then calculate the median absolute value: 
 \[
-\sigma = \text{median}_{i,j}\left( \left| Z_{i,j+1} - Z_{i,j} \right| \right),
+\sigma = \text{median}\left[ \left| Z_{i,j+1} - Z_{i,j} \right| \right]_{i,j},
 \]
-where $i$ numerates magnetic flux values, and $j$ numerates excitation frequency values. Using median instead mean reduces the impact of singular bright extrema that may be present in the row.
+where $i$ numerates current values, and $j$ numerates excitation frequency values. Using median instead of mean reduces the impact of singular bright extrema that may be present in the row.
 
 Next, for each row we use the \textit{find\_peaks} routine of the Scipy library to detect all local extrema there, and then exclude those whose height is less than $\sigma$ as probably originating from the noise.
 
@@ -244,19 +248,19 @@ The final extracted points are shown in \autoref{fig:extract_points} in black cr
 
 \subsubsection{Fitting binary data}
 
-\paragraph{General outline of the method.} In most cases, even the filtered binary data contains noise and, importantly, is not single-valued for each flux value. This means that standard curve fitting methods are not applicable, and thus we resort to a hybrid algorithm that combines features of the Hough transform\cite{hough1962} for global optimization and Nelder-Mead search local optimization. The algorithm bases on three main parts: the point selection procedure, solution ranking and parameter sampling. The selection procedure is universal, and the latter two parts come in two variations depending on which type of optimization will be used.
+\paragraph{General outline of the method.} In most cases, even the filtered binary data contains noise and, importantly, is not single-valued for each flux value. This means that standard curve fitting methods are not applicable, and thus we resort to a hybrid algorithm that combines features of the Hough transform\cite{hough1962} for global optimization and Nelder-Mead search local optimization. The algorithm bases on three main parts: the point selection procedure, solution ranking and parameter sampling. The selection procedure is universal, and the latter two parts come in two variations depending on which type of optimization is used.
 
-The general idea for the first part is illustrated in \autoref{fig:hough_illustration}. Here, three narrow frequency bands of $\Delta f$ are chosen around the model spectral lines calculated for tested parameters by \eqref{eq:tr_levels}. Points outside the bands are considered far away and are ignored. All the points inside a band are attributed to its line and included in its loss function. If at a certain flux there are several points inside a band, only the closest one is chosen and the rest (contentious) are ignored. 
+The general idea for the first part is illustrated in \autoref{fig:hough_illustration}. Here, three narrow frequency bands of $\Delta f$ are chosen around the model spectral lines calculated for tested parameters by \eqref{eq:tr_spectrum}. Points outside the bands are considered far away and are ignored. All the points inside a band are attributed to its line and included in its loss function. If at a certain flux there are several points inside a band, only the closest one is chosen and the rest (contentious) are ignored. 
 \begin{figure}[b]
 	\centering
 	\includegraphics[width=0.8\linewidth]{hough_illustration}
 	\caption{An illustration for the loss function definition. In different colours are the frequency bands and the corresponding selected points, black points are ignored.}
 	\label{fig:hough_illustration}
 \end{figure}
-Let $P_{1,2,3}$ be the sets of points selected for corresponding transition lines $ge, gf/2, gd/3$ (in blue, orange and green in \autoref{fig:hough_illustration}); the number of points in the sets are $N_{1,2,3}$, $N_\Sigma = \sum_i N_i$, and $M$ is the total number of measured magnetic flux values; let $D_{1,2,3}$ be the corresponding sets of vertical distances between the selected points and the corresponding spectral lines. Finally, let $D$ be the vertical distances between all the extracted points $P$ (both black and coloured in \autoref{fig:hough_illustration}, total number $N$) and the upper spectral line.
+Let $P_{1,2,3}$ be the sets of points selected for corresponding transition lines $ge, gf/2, gd/3$ (in blue, orange and green in \autoref{fig:hough_illustration}); the number of points in the sets are $N_{1,2,3}$, $N_\Sigma = \sum_i N_i$, and $M$ is the total number of measured magnetic flux values. Finally, let $D_{1,2,3}$ be the corresponding sets of vertical distances between the selected points and the corresponding spectral lines.
 
 
-The second part of the algorithm now has to evaluate the quality of the fit, i.e. be able to rank supplied sets of optimization parameters. The ranking differs for the brute search and for the local optimization. 
+The second part of the algorithm now has to evaluate the quality of the fit, i.e. be able to rank a supplied sets of optimization parameters. The ranking differs for the brute search and for the local optimization. 
 
 In case of the brute search, the evaluation is based both on the total number of selected points $N_\Sigma$ and the normalized squared distances $\langle D_\Sigma^2 \rangle  = {\sum_i \sum_{P_i} D_i^2/N_1}$ (note that we normalize based just on $N_1$ to respect the majority voting in case of low $N_2, N_3$). Maximizing the total number of points included ought to have a higher priority than minimizing the average distances, since otherwise a single selected point lying exactly on the spectral line would win. However, in the presence of spurious spectral lines this prioritization may lead to wrong results since an incorrect solution with a slightly larger $N_\Sigma$ but high normalized distance measure would overshadow the correct one with a low distance measure. To battle this effect and increase the influence of the distance loss, we quantize $N_\Sigma$ into bins of size $N_b$ equal to 25\% of the total number of fluxes $M$, and then choose from the best bin the solution having the lowest distance measure. 
 
@@ -264,7 +268,7 @@ Alternatively, for the Nelder-Mead algorithm one should build a loss function th
 \begin{equation}
 \mathcal{L}_{N\text{-}M} = \frac{1}{[N_\Sigma/N_b]N_b} + \langle D_\Sigma^2 \rangle.
 \end{equation}
-This loss function has a convex shape near the sought extremum; this makes it possible to run the Nelder-Mead algorithm seamlessly.
+This loss function has a convex shape near the sought extremum; this makes it possible to run the Nelder-Mead algorithm without risk of escaping the optimal valley.
   
 Finally, the third part of the algorithm is either the brute force search to find the global extremum or the Nelder-Mead descent to polish the found parameters.
 
@@ -275,24 +279,28 @@ To sum up, the local optimization is done on points belonging to a narrow freque
 
 \paragraph{Single-line optimization}
 
-First of all, we refine some given coarse initial values for the qubit parameters (period $\Pi_{\Phi_r}^{(0)}$, sweet spot location $\Phi_r^{(0)}$, $f_{ge}^{max, (0)}$ and $d^{(0)}$). This is necessary because usually the initial guess comes from the results of the single-tone spectroscopy fitting which may be inaccurate due to noise. The refinement is performed using a single spectral line by two brute force searches and then a Nelder-Mead optimization on the chosen points. 
+First of all, we refine the given coarse initial values for the qubit parameters. We assume that the supplied period $\Pi$ is accurate which is true if the initial guess stems from the single-tone spectroscopy fitting, and that the other parameters may be inaccurate due to noise/magnetic flux shifts. So, only the sweet spot location $I_{ss}^{(0)}$, $f_{ge}^{max, (0)}$ and $d^{(0)}$ are optimized by brute force. The refinement is performed using a single spectral line by two brute force searches and then a Nelder-Mead optimization on the chosen points.
 
-First brute force is done with a wide frequency band $\Delta f$=100 MHz around it and a grid specified in .
+First brute force is done with a wide frequency band $\Delta f$=100 MHz around it and a grid specified in \autoref{tab:grid_tts}. We do a rather wide search of 10\% of the period $\Pi$ around the initial sweet spot position $I_{ss}(0)$ since in our data there are sometimes inconsistencies between the single-tone and the two-tone spectroscopy that have been recorded on different days. In the real experiment, though, it is not usually necessary since flux drifts are rare if the two-tone scan is taken right after the single-tone. Due to rather large $\Delta f$ value, the first search is used only to generally locate the extracted points in the parameter space. The found coarse optimum is denoted as $I_{ss}^{(1)}$, $f_{ge}^{max, (1)}$ and $d^{(1)}$.
+
+Then, the second brute force is launched with contracted parameter ranges around the coarse optimum (see \autoref{tab:grid_tts}) and reduced $\Delta f$. This search already is aimed to locate the near-optimal point in the parameter space. Importantly, this step may not find exactly the highest line $f_{ge}(I)$, but it certainly will find one of the lines that has the most points in it, i.e. $f_{gf/2}(I)$, and thus get an incorrect value for $f_{ge}^{max, (2)}$. This behaviour can't be overcome except than by fitting multiple lines at the same time. For the other two parameters $I_{ss}^{(2)}$ and $d^{(2)}$ there is no ambiguity, and they are estimated accurately.
+
+Finally, the chosen points from the second brute force are used to fit the model using the Nelder-Mead algorithm. This procedure is allowed to polish the 3 parameters from the second brute search and
 
 \begin{table}
 	\centering
 	\begin{ruledtabular}
-		\begin{tabular}{*5c} 
-			\multicolumn{2}{c}{Optimization} & $\Phi_r$ & $f_{ge}^{max}$ &  	$d$\\
+		\begin{tabular}{c|*4c} 
+			\multicolumn{2}{c}{Optimization} & $I_{sws}$ & $f_{ge}^{max}$ &  	$d$\\
 			\hline
-			\multirow{2}{*}{Brute 1} & range & $\Phi_r^{(0)}\pm .05\, \Pi_{\Phi_e}^{(0)}$ & $f_{ge}^{max, (0)}\pm 30\%$ & 0.1 - 0.9  \\
-			&steps & 10& 50& 8\\
-			\multirow{2}{*}{Brute 2} & range & $\Phi_r^{(1)}\pm .02\, \Pi_{\Phi_e}^{(0)}$ & $f_{ge}^{max, (1)}\pm 100$ MHz & $d^{(1)}\pm 0.1$ \\
+			\multirow{2}{*}{\makecell{Brute 1\\ $\Delta f$=100 MHz}} & range & $I_{ss}^{(0)}\pm .05\, \Pi$ & $f_{ge}^{max, (0)}\pm 30\%$ & 0.1 - 0.9  \\
+			&steps & 10& 50& 8\\\hline
+			\multirow{2}{*}{\makecell{Brute 2\\$\Delta f$=50 MHz}} & range & $I_{ss}^{(1)}\pm .02\, \Pi$ & $f_{ge}^{max, (1)}\pm 100$ MHz & $d^{(1)}\pm 0.1$ \\
 			& steps & 10 & 20 & 10
 		\end{tabular}
 	 
 \end{ruledtabular}
-	\caption{Grid specifications for the brute force algorithm and the resulting optimal points. The number of steps is taken with some margin to ensure correct location of the optimal valley even for difficult cases. The optimal parameters estimated by brute force and the final ones have the RMS loss values of 0.258 MHz and 0.024 MHz, respectively.}
+	\caption{Grid specifications for the brute force algorithm in the single-line fitting. First iteration is a coarse search and the second is more accurate.}
 	\label{tab:grid_tts}
 \end{table}
 
@@ -310,7 +318,7 @@ The brute force algorithm acts on the grid specified in \autoref{tab:grid}. The 
 After the coarse brute force optimization is done and the optimal valley is located, we apply the Nelder-Mead simplex downhill algorithm to polish the brute force result. This algorithm works very well in our case, as one can see from the \autoref{tab:grid} comparing the brute estimation and  the final result after Nelder-Mead is performed. The significant improvement in the loss value of the polished result compared to the brute estimation is due to the more accurate determination of the cavity frequency $f_c$ which leads as well to major shifts in optimal $g$, $f_{ge}^{max}$ and $d$.
 
 
-Finally, the resulting fit is presented in \autoref{fig:anti_fit} along with the plot of the residuals. The match is almost perfect, and the noise in the residuals is random and thus shows no systematic errors. In \autoref{fig:noise_test} we also present the fitting results for different powers of added noise. The signal-to-noise ratio (SNR) is defined for our data in a similar manner as the SNR in the resonator fitting tests\cite{probst2015}; we take distance $2r$ between two maximally remote points of $S_{21}(f_p, \Phi_e)$ among any pair on the complex plane (i.e., the diameter of the resonance circle) as the signal amplitude, and the noise of the form $\frac{\xi_1+i\xi_2}{\sqrt 2}$, where $\xi_1,\ \xi_2$ distributed normally with zero mean and variance (amplitude) $\sigma$. The SNR then is defined as $r/\sigma$. As one can see from the graph, the algorithm stays robust even at very low SNRs that are even lower than the low limit SNRs for the \textit{circlefit} stability. This is possible because a fallback strategy of taking the smallest amplitude point as the resonance is applied when \textit{circlefit} fails. Ultimately, the key point of this stress test is to show that the algorithm can be applied in real-life scenarios when the data may be of low quality.
+Finally, the resulting fit is presented in \autoref{fig:anti_fit} along with the plot of the residuals. The match is almost perfect, and the noise in the residuals is random and thus shows no systematic errors. In \autoref{fig:noise_test} we also present the fitting results for different powers of added noise. The signal-to-noise ratio (SNR) is defined for our data in a similar manner as the SNR in the resonator fitting tests\cite{probst2015}; we take distance $2r$ between two maximally remote points of $S_{21}(f_p, I)$ among any pair on the complex plane (i.e., the diameter of the resonance circle) as the signal amplitude, and the noise of the form $\frac{\xi_1+i\xi_2}{\sqrt 2}$, where $\xi_1,\ \xi_2$ distributed normally with zero mean and variance (amplitude) $\sigma$. The SNR then is defined as $r/\sigma$. As one can see from the graph, the algorithm stays robust even at very low SNRs that are even lower than the low limit SNRs for the \textit{circlefit} stability. This is possible because a fallback strategy of taking the smallest amplitude point as the resonance is applied when \textit{circlefit} fails. Ultimately, the key point of this stress test is to show that the algorithm can be applied in real-life scenarios when the data may be of low quality.
 
 
 \begin{table}
@@ -319,12 +327,10 @@ Finally, the resulting fit is presented in \autoref{fig:anti_fit} along with the
 		\begin{tabular}{ccccc} 
 			Parameter & Value range & Steps \# & Brute est. & Final \\ 
 			\hline
-			$M$ & $\Phi_0/\Pi_{f_r}$ & 1 & 11.4 $\Phi_0$/mA &  same \\
-			$\Phi_r$ & $M I^{max}$ & 1 & -0.13 $\Phi_0$ & same \\
 			$f_c$ & $\langle f_r \rangle_{I} \pm 1$ MHz & 3 & 6.5003 GHz & 6.5007 GHz\\
 			$g$ & 20 - 40 MHz & 5 & 24 MHz & 36.1 MHz \\
 			$f_{ge}^{max}$ &  4 - 12 GHz & 80 & 8 GHz & 8.9 GHz\\
-			$d$& 0 - 0.9 & 9 & 0.5 & 0.08\\ 
+			$d$& 0 - 0.9 & 9 & 0.5 & 0.08
 		\end{tabular} 
 	\end{ruledtabular}
 	\caption{Grid specifications for the brute force algorithm and the resulting optimal points. The number of steps is taken with some margin to ensure correct location of the optimal valley even for difficult cases. The optimal parameters estimated by brute force and the final ones have the RMS loss values of 0.258 MHz and 0.024 MHz, respectively.}
