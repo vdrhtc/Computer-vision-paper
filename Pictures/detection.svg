@@ -33724,8 +33724,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.9351902"
-     inkscape:cx="428.54786"
-     inkscape:cy="108.93933"
+     inkscape:cx="369.35594"
+     inkscape:cy="45.459924"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -33753,7 +33753,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -34519,57 +34519,31 @@
       </g>
       <g
          id="g105081"
-         style="fill:#000000;fill-opacity:1">
-        <use
-           id="use105067"
-           y="56.249397"
-           x="39.438099"
-           xlink:href="#glyph0-17-52"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105069"
-           y="56.249397"
-           x="45.7981"
-           xlink:href="#glyph0-18-5"
-           width="100%"
-           height="100%" />
+         style="fill:#000000;fill-opacity:1;stroke-width:1.12925422"
+         transform="matrix(0.88554022,0,0,0.88554022,8.4934446,5.3786417)">
         <use
            id="use105071"
            y="56.249397"
            x="53.4981"
            xlink:href="#glyph0-19-4"
            width="100%"
-           height="100%" />
-        <use
-           id="use105073"
-           y="56.249397"
-           x="56.668098"
-           xlink:href="#glyph0-20-7"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105075"
-           y="56.249397"
-           x="63.008099"
-           xlink:href="#glyph0-5-2"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105077"
-           y="56.249397"
-           x="65.778099"
-           xlink:href="#glyph0-9-7"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105079"
-           y="56.249397"
-           x="71.8881"
-           xlink:href="#glyph0-8-37"
-           width="100%"
-           height="100%" />
-      </g>
+           height="100%"
+           style="stroke-width:1.12925422" />
+        <flowRoot
+           xml:space="preserve"
+           id="flowRoot10725"
+           style="font-style:normal;font-weight:normal;font-size:13.33333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.12925422"
+           transform="matrix(0.81908451,0,0,0.81908451,-23.490044,-4.4047645)"><flowRegion
+             id="flowRegion10727"
+             style="font-size:13.33333302px;stroke-width:1.12925422"><rect
+               id="rect10729"
+               width="69.771896"
+               height="43.841343"
+               x="64.960052"
+               y="63.974102"
+               style="font-size:13.33333302px;stroke-width:1.12925422" /></flowRegion><flowPara
+             id="flowPara10731"
+             style="stroke-width:1.12925422">1D curve</flowPara></flowRoot>      </g>
       <g
          id="g105093"
          style="fill:#000000;fill-opacity:1">
@@ -34861,66 +34835,6 @@
            width="100%"
            height="100%" />
       </g>
-      <g
-         id="g105193"
-         style="fill:#000000;fill-opacity:1">
-        <use
-           id="use105177"
-           y="146.42183"
-           x="144.73305"
-           xlink:href="#glyph0-17-52"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105179"
-           y="146.42183"
-           x="151.09305"
-           xlink:href="#glyph0-18-5"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105181"
-           y="146.42183"
-           x="158.79305"
-           xlink:href="#glyph0-19-4"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105183"
-           y="146.42183"
-           x="161.96304"
-           xlink:href="#glyph0-20-7"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105185"
-           y="146.42183"
-           x="168.30304"
-           xlink:href="#glyph0-5-2"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105187"
-           y="146.42183"
-           x="171.07304"
-           xlink:href="#glyph0-9-7"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105189"
-           y="146.42183"
-           x="177.18304"
-           xlink:href="#glyph0-8-37"
-           width="100%"
-           height="100%" />
-        <use
-           id="use105191"
-           y="146.42183"
-           x="181.10304"
-           xlink:href="#glyph0-13-67"
-           width="100%"
-           height="100%" />
-      </g>
       <path
          id="path105195"
          d="m 135.9375,65.449219 v -13.3125"
@@ -35196,6 +35110,33 @@
            width="100%"
            height="100%" />
       </g>
+      <g
+         id="g105081-3"
+         style="fill:#000000;fill-opacity:1;stroke-width:1.12925422"
+         transform="matrix(0.8855402,0,0,0.8855402,113.3163,94.525953)">
+        <use
+           id="use105071-5"
+           y="56.249397"
+           x="53.4981"
+           xlink:href="#glyph0-19-4"
+           width="100%"
+           height="100%"
+           style="stroke-width:1.12925422" />
+        <flowRoot
+           xml:space="preserve"
+           id="flowRoot10725-6"
+           style="font-style:normal;font-weight:normal;font-size:13.33333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.12925422"
+           transform="matrix(0.81908451,0,0,0.81908451,-23.490044,-4.4047645)"><flowRegion
+             id="flowRegion10727-2"
+             style="font-size:13.33333302px;stroke-width:1.12925422"><rect
+               id="rect10729-9"
+               width="69.771896"
+               height="43.841343"
+               x="64.960052"
+               y="63.974102"
+               style="font-size:13.33333302px;stroke-width:1.12925422" /></flowRegion><flowPara
+             id="flowPara10731-1"
+             style="stroke-width:1.12925422">1D curves</flowPara></flowRoot>      </g>
     </g>
     <g
        id="g104507">
@@ -35509,7 +35450,7 @@
            height="16.574169"
            x="603.35321"
            y="164.46561" /></flowRegion><flowPara
-         id="flowPara120835"></flowPara></flowRoot>    <text
+         id="flowPara120835" /></flowRoot>    <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        x="126.3797"
@@ -35827,16 +35768,18 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot148591"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.33333302px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-       transform="matrix(0.26458333,0,0,0.26458333,-48.022878,37.19956)"><flowRegion
-         id="flowRegion148593"><rect
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.33333302px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none"
+       transform="matrix(0.26458333,0,0,0.26458333,-62.555834,38.020759)"><flowRegion
+         id="flowRegion148593"
+         style="line-height:1;text-align:center;text-anchor:middle"><rect
            id="rect148595"
-           width="98.375702"
-           height="16.574173"
+           width="185.98335"
+           height="43.739895"
            x="381.47321"
-           y="0.35067791" /></flowRegion><flowPara
-         id="flowPara148597"
-         style="font-size:12px">Single-tone</flowPara></flowRoot>    <flowRoot
+           y="0.35067791"
+           style="line-height:1;text-align:center;text-anchor:middle" /></flowRegion><flowPara
+         style="font-size:12px;line-height:1;text-align:center;text-anchor:middle"
+         id="flowPara10795">Single-tone result</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot148591-4"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.33333302px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
@@ -35850,18 +35793,6 @@
          id="flowPara148597-0"
          style="font-size:12px">Model</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
-       id="flowRoot148591-2"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.33333302px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-       transform="matrix(0.26458333,0,0,0.26458333,33.386751,37.413372)"><flowRegion
-         id="flowRegion148593-8"><rect
-           id="rect148595-7"
-           width="98.375702"
-           height="16.574173"
-           x="381.47321"
-           y="0.35067791" /></flowRegion><flowPara
-         id="flowPara148597-8"
-         style="font-size:12px">Two-tone</flowPara></flowRoot>    <flowRoot
-       xml:space="preserve"
        id="flowRoot148591-4-9"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.33333302px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        transform="matrix(0.26458333,0,0,0.26458333,75.359544,37.564769)"><flowRegion
@@ -35872,5 +35803,19 @@
            x="381.47321"
            y="0.35067791" /></flowRegion><flowPara
          id="flowPara148597-0-8"
-         style="font-size:12px">Model</flowPara></flowRoot>  </g>
+         style="font-size:12px">Model</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot148591-27"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.33333302px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none"
+       transform="matrix(0.26458333,0,0,0.26458333,17.378504,37.834246)"><flowRegion
+         id="flowRegion148593-0"
+         style="line-height:1;text-align:center;text-anchor:middle"><rect
+           id="rect148595-93"
+           width="185.98335"
+           height="43.739895"
+           x="381.47321"
+           y="0.35067791"
+           style="line-height:1;text-align:center;text-anchor:middle" /></flowRegion><flowPara
+         style="font-size:12px;line-height:1;text-align:center;text-anchor:middle"
+         id="flowPara10795-6">Two-tone result</flowPara></flowRoot>  </g>
 </svg>
