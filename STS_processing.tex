@@ -50,7 +50,7 @@
 
 \preprint{AIP/123-QED}
 
-\title[Automated analysis of spectroscopic data for cQED systems]{Automated analysis of spectroscopic data for cQED systems\\~}
+\title[Automated analysis of spectroscopic data of cQED systems]{Automated analysis of spectroscopic data of cQED systems\\using computer vision~}
 % Force line breaks with \\
 
 \author{G.Fedorov}
@@ -130,9 +130,6 @@ The structure of the rest of the paper is as follows. First, we will describe ou
 
 In this section, we describe the approaches towards extraction of Hamiltonian parameters from the two types of spectroscopic measurement results. Additionally, we describe important peculiarities of the data itself and some essential experimental details.
 
-
-\subsection{Single-tone spectroscopy recognition}
-
 Usually, in the experiment the spectrum of the readout resonator is recorded using a vector network analyzer (VNA).  The VNA measures a complex scattering parameter $S_{ij}$ for a range of probe frequencies $\Delta f_p$ around the resonance. Hence, one VNA scan may be represented as two 1D plots for the amplitude $|S_{ij}(f_p)|$ and the phase $\angle S_{ij}(f_p)$ of the scattering parameter. When the magnetic flux sweep is added, the data becomes three-dimensional and has to be represented visually using two heatmap plots for $|S_{ij}(f_p, I)|$ and $\angle S_{ij}(f_p, I)$. In \autoref{fig:anti_exp}(a) one can find an experimental heatmap from our database for a notch-type (side-coupled) coplanar waveguide resonator coupled to a tunable transmon qubit. Only the amplitude $|S_{21}(f_p, I)|$ is shown.
 \begin{figure}[h!]
 \includegraphics[width=\linewidth]{anti_subplots}
@@ -144,7 +141,7 @@ To extract the Hamiltonian parameters, we propose to fit the model \eqref{eq:f_r
 
 An outline of the method which uses \autoref{fig:anti_exp}(a) as an example is presented below. The chosen type of the resonator-qubit arrangement which yields the avoided crossings pattern is not universal: there are two other cases when the qubit spectrum lies entirely below or above the resonator frequency; however, they are treated exactly the same way and are simpler in terms of the loss function behaviour.
 
-\subsubsection{Extracting $f_r(I)$ from data}\label{sec:extract_fr}
+\subsection{Extracting $f_r(I)$ from data}\label{sec:extract_fr}
 
 Firstly, we are going to reduce the dimensionality of the data, i.e. extract the resonance frequency for each $I$.
 
@@ -152,7 +149,7 @@ We do this by employing the \textit{circlefit}\cite{probst2015} library which is
 
 The resulting plot of the extracted resonator frequency versus current $I$ is shown in \autoref{fig:anti_exp}(c) (blue dots). There are some current values located between the branches where the data points are missing, as expected, due to the absence of the resonance. Additionally, we plot here the mean value of the detected frequencies shown as a dashed black line. This parameter is important since it, will firstly, serve as an initial guess for the cavity frequency of the model \eqref{eq:f_r}: $f_c \approx \langle f_r \rangle_{I}$ and, secondly, will be used in the period and phase extraction algorithm which tracks the changes of the sign of the value $\Delta f_r = f_r - \langle f_r \rangle_{I}$ (marked as grey dashed lines in \autoref{fig:anti_exp}(c)). Locating these sign changes allows to find the qubit sweet spot without fittig the full model.
 
-\subsubsection{Extracting period, phase and sweet spot locations}
+\subsection{Extracting period, phase and sweet spot locations}
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{per+phase}
@@ -178,7 +175,7 @@ I_{ss} =
 To distinguish between these two cases when the noise is not too large, one may calculate the maximal absolute differential of the frequency data $\max_{i>0} |f_{r,i} - f_{{r,i}-1}|$ and compare it to the peak-to-peak amplitude $\max_{i,j} | f_{r,i} - f_{r, j}|$. For the avoided crossings these values are close and for the smooth dependencies they are not. However, in the presence of noise this indicator may fail, and one will have to check both current values to be $I_{ss}$ by fitting the full model two times, and then choose among the two possibilities based on the loss value.
 
 
-\subsubsection{Full model fitting}
+\subsection{Full model fitting}
 
 \begin{figure}
 \centering
@@ -220,138 +217,9 @@ To substantiate the choice of the optimization algorithms, we present in \autore
 The brute force algorithm acts on the grid specified in \autoref{tab:grid}. The ranges in the grid are based on the usual design parameters of the qubit samples in our database and the number of steps is chosen so that the algorithm reliably finds the optimal valley. After the coarse brute force optimization is done and the optimal valley is located, we apply the Nelder-Mead search on all 6 parameters.
 
 
-\subsection{Two-tone spectroscopy recognition}
-
-
-Unfortunately, the resonator fitting procedure accuracy in terms of the qubit frequency (usually >50 MHz) is not enough in practical applications where it is necessary to obtain exact value of the qubit frequency down to 1-10 MHz. For the cQED systems, it may be done, in general, by trying to excite the qubit at different frequencies and then read it out expecting the $e$-state to be measured. The task is to find the exact location and shape of all the spectral lines depending on the magnetic flux that will be detected using such a method. 
-
-\begin{figure}[b]
-	\centering
-	\includegraphics[width=\linewidth]{twotone}
-	\caption{Two types of spectroscopy results side by side; the colorbar is common, coil current scan range is the same. (a) Single-tone spectroscopy (one period on $I$). (b) Two-tone spectroscopy result. Clear flux-dependent transmon transitions are visible ($ge$ and $gf/2$), and some fixed-frequency resonator excitations are present as well. Red vertical stripes are observed when the qubit and the cavity are close to resonance.}
-	\label{fig:twotone}
-\end{figure}
-
-
-Particularly, in many groups the qubit spectrum is searched for using the so-called two-tone spectroscopy\cite{wallraff2007}. It is done by sending two microwave signals at the cQED system from which the first one, the probe tone, has a fixed frequency near $f_c$, and the frequency $f_{exc}$ of the other, excitation tone,  is varied. When the second signal becomes resonant with some transition (i.e., qubit $ge$ transition), a shift of the cavity frequency occurs, and thus the transmission at the frequency of the first tone changes. This way, a heatmap showing the dependence of the frequency of various system transitions on the magnetic flux can be obtained. 
-
-An example from our database for a tunable transmon coupled to a notch-port resonator is displayed in \autoref{fig:twotone}. To obtain the two-tone spectrum in \autoref{fig:twotone}(b), for each current value the frequency of the first tone $f_p$ is chosen to be equal to the frequency of the minimal transmission from the single-tone spectroscopy (STS), see \autoref{fig:twotone}(a). At the avoided crossing, this is not possible, and thus the frequency $f_p$ may be chosen to be arbitrary within the scan area of the STS. This does not pose a problem since the two-tone spectroscopy is still only effective when the qubit and the resonator are detuned far from each other, i.e. in the dispersive regime\cite{blais2004}, and would not work well near the resonant regime.
-
-The resulting plot \autoref{fig:twotone}(b) shows the dependence of $S_{21}$ on the magnetic flux and the excitation frequency. Most of the scan is in blue meaning that the resonator is not shifted and the probe tone gets almost entirely reflected (see colorbar). However, there are some different colour areas. Firstly, a bright and narrow horizontal line is observed near 6.5 GHz where the resonator is located. Likewise, there are two sharp horizontal lines just above 6.75 GHz which are from the crosstalk coupling to another on-chip resonator. Secondly, bright vertical stripes are seen at the current values corresponding to the avoided crossing areas. Finally, two transmon transitions of varying frequency are visible. The upper one is the $ge$ transition, and the lower one is the two-photon $gf/2$ one; at each coil current, they are separated by $E_C/2h$, or half the anharmonicity of the transmon (see \autoref{tab:tr_transitions}).
-
-The presence of several bright lines along with noise makes it in general impossible to accurately fit the data with the model \eqref{eq:tr_levels} using the standard curve fitting procedures. Additionally, when several multi-photon transitions are visible, it is hard for an algorithm to distinguish between them to find only the $ge$ transition. This means that for robust qubit detection we need to fit all possible single- and multi-photon spectral lines simultaneously. Below, we present our approach to solve this problem.
-
-
-
-\subsubsection{Thresholding the data}
-
-Similar to the reasoning in \autoref{sec:extract_fr}, the first thing to do is to reduce the three-dimensional picture \autoref{fig:twotone} to two dimensions. This is done in several steps.
-
-First, we calculate the median absolute transmission $\text{median} [S_{21}]_{f_{exc}} (I)$ for each current value (or frequency column). It gives us the background dependent only on $I$ and not on  $ f_{exc} $ which can be then subtracted from the data; then, the absolute value of the difference $ Z = \left| S_{21} - \text{median} [S_{21}]_{f_{exc}} \right |$ may be plotted. The subtraction both removes the background and in each data column and highlights the points that are distinct in either amplitude or phase. For our example, the resulting image can be seen in \autoref{fig:extract_points}. As one can notice, the background subtraction removes most of the vertical stripes that were present in \autoref{fig:twotone}(b).
-
-Next, the data points may be extracted to form a 2D point array where the qubit lines may be searched for. This procedure is done in several steps. First of all, it is necessary to do thresholding of the data to obtain a binary image. We have tested various thresholding methods, i.e. Otsu's method\cite{otsu1979}; however, the best performance in distinguishing local peaks from background was obtained using another method that is based on estimating the noise in the data. We estimate noise level $\sigma$ by calculating the numerical difference between adjacent points in a row for each flux value, and then calculate the median absolute value: 
-\[
-\sigma = \text{median}\left[ \left| Z_{i,j+1} - Z_{i,j} \right| \right]_{i,j},
-\]
-where $i$ numerates current values, and $j$ numerates excitation frequency values. Using median instead of mean reduces the impact of singular bright extrema that may be present in the row.
-
-Next, for each row we use the \textit{find\_peaks} routine of the SciPy\cite{scipy} library to detect all local extrema there, and then exclude those whose height is less than $\sigma$ as probably originating from the noise.
-
-After finishing the procedures above, we get an array of points that correspond to the most prominent peaks in the data. However, already at this point it is possible to remove all points that come from the fixed-frequency resonator spectral lines. This is done by excluding horizontal rows of points that have exactly the same frequency value within the resolution of the data.
-
-The final extracted points are shown in \autoref{fig:extract_points} in black crosses. As one can see, the horizontal lines are correctly not included, and two qubit lines are almost fully represented. Background noise is mostly ignored, too.
-
-
-\begin{figure}
-	\includegraphics[width=\linewidth]{extract_points}
-	\caption{Processed data and extracted and filtered datapoints (black crosses) that will be subject to fitting.}
-	\label{fig:extract_points}
-\end{figure}
-
-\subsubsection{Fitting binary data}
-
-\paragraph{General outline of the method.} In most cases, even the filtered binary data contains noise and, importantly, is not single-valued for each flux value. This means that standard curve fitting methods are not applicable, and thus we resort to a hybrid algorithm that combines features of the Hough transform\cite{hough1962} for global optimization and Nelder-Mead search local optimization. The algorithm bases on three main parts: the point selection procedure, solution ranking and parameter sampling. The selection procedure is universal, and the latter two parts come in two variations depending on which type of optimization is used.
-
-The general idea for the first part is illustrated in \autoref{fig:hough_illustration}. Here, three narrow frequency bands of $\Delta f$ are chosen around the model spectral lines calculated for tested parameters by \eqref{eq:tr_spectrum}. Points outside the bands are considered far away and are ignored. All the points inside a band are attributed to its line and included in its loss function. If at a certain flux there are several points inside a band, only the closest one is chosen and the rest (contentious) are ignored. 
-\begin{figure}[b]
-	\centering
-	\includegraphics[width=0.8\linewidth]{hough_illustration}
-	\caption{An illustration for the loss function definition. In different colours are the frequency bands and the corresponding selected points, black points are ignored.}
-	\label{fig:hough_illustration}
-\end{figure}
-Let $P_{1,2,3}$ be the sets of points selected for corresponding transition lines $ge, gf/2, gd/3$ (in blue, orange and green in \autoref{fig:hough_illustration}); the number of points in the sets are $N_{1,2,3}$, $N_\Sigma = \sum_i N_i$, and $M$ is the total number of measured magnetic flux values. Finally, let $D_{1,2,3}$ be the corresponding sets of vertical distances between the selected points and the corresponding spectral lines.
-
-
-The second part of the algorithm now has to evaluate the quality of the fit, i.e. be able to rank a supplied sets of optimization parameters. The ranking differs for the brute search and for the local optimization. 
-
-In case of the brute search, the evaluation is based both on the total number of selected points $N_\Sigma$ and the normalized squared distances $\langle D_\Sigma^2 \rangle  = {\sum_i \sum_{P_i} D_i^2/N_1}$ (note that we normalize based just on $N_1$ to respect the majority voting in case of low $N_2, N_3$). Maximizing the total number of points included ought to have a higher priority than minimizing the average distances, since otherwise a single selected point lying exactly on the spectral line would win. However, in the presence of spurious spectral lines this prioritization may lead to wrong results since an incorrect solution with a slightly larger $N_\Sigma$ but high normalized distance measure would overshadow the correct one with a low distance measure. To battle this effect and increase the influence of the distance loss, we quantize $N_\Sigma$ into bins of size $N_b$ equal to 25\% of the total number of fluxes $M$, and then choose from the best bin the solution having the lowest distance measure. 
-
-Alternatively, for the Nelder-Mead algorithm one should build a loss function that returns just a single value instead of a double-valued rank as before. Since we still want to both maximize the number of points and minimize the mean distances, we take again same binned value $[N_\Sigma/N_b]N_b$ and $\langle D_\Sigma^2 \rangle$ but now calculate the function
-\begin{equation}
-\mathcal{L}_{N\text{-}M} = \frac{1}{[N_\Sigma/N_b]N_b} + \langle D_\Sigma^2 \rangle.
-\end{equation}
-This loss function has a convex shape near the sought extremum; this makes it possible to run the Nelder-Mead algorithm without risk of escaping the optimal valley.
-  
-Finally, the third part of the algorithm is either the brute force search to find the global extremum or the Nelder-Mead descent to polish the found parameters.
-
-Note the similarity between this construction and the Hough transform. The transform is implemented by quantizing the Hough parameter space into finite intervals or accumulator cells that each point votes for. Likewise, we use the frequency band (frequency quantization) to find the points voting for a certain parameter set; other parameters are as well quantized on a brute search grid. However, our approach is extended by a subsequent local optimization necessary since we want to improve the accuracy beyond brute grid resolution.
-
-To sum up, the local optimization is done on points belonging to a narrow frequency band around the spectral line when this band contains as many points as possible. This logic is applicable both to single-line and multi-line fitting. In the following, we will use single-line fitting to find at least one spectral line in the point cloud, and then full multi-line fitting to detect all lines that may be present.
-
-
-\paragraph{Single-line optimization}
-
-First of all, we refine the given coarse initial values for the qubit parameters. We assume that the supplied period $\Pi^{(0)}$ is accurate which is true if the initial guess stems from the single-tone spectroscopy fitting, and that the other parameters may be inaccurate due to noise/magnetic flux shifts. So, only the sweet spot location $I_{ss}^{(0)}$, $f_{ge}^{max, (0)}$ and $d^{(0)}$ are optimized by brute force. The refinement is performed using a single spectral line by two brute force searches and then a Nelder-Mead optimization on the chosen points.
-
-First brute force is done with a wide frequency band $\Delta f$=100 MHz around it and a grid specified in \autoref{tab:grid_tts}. We do a rather wide search of 10\% of the period $\Pi$ around the initial sweet spot position $I_{ss}(0)$ since in our data there are sometimes inconsistencies between the single-tone and the two-tone spectroscopy that have been recorded on different days. In the real experiment, though, it is not usually necessary since flux drifts are rare if the two-tone scan is taken right after the single-tone. Due to rather large $\Delta f$ value, the first search is used only to generally locate the extracted points in the parameter space. The found coarse optimum is denoted as $I_{ss}^{(1)}$, $f_{ge}^{max, (1)}$ and $d^{(1)}$.
-\begin{table}
-	\centering
-	\begin{ruledtabular}
-		\begin{tabular}{c|*4c} 
-			\multicolumn{2}{c}{Optimization} & $I_{sws}$ & $f_{ge}^{max}$ &  	$d$\\
-			\hline
-			\multirow{2}{*}{\makecell{Brute 1\\ $\Delta f$=100 MHz}} & range & $I_{ss}^{(0)}\pm .05\, \Pi^{(0)}$ & $f_{ge}^{max, (0)}\pm 30\%$ & 0.1 - 0.9  \\
-			&steps & 10& 50& 8\\\hline
-			\multirow{2}{*}{\makecell{Brute 2\\$\Delta f$=50 MHz}} & range & $I_{ss}^{(1)}\pm .02\, \Pi^{(0)}$ & $f_{ge}^{max, (1)}\pm 100$ MHz & $d^{(1)}\pm 0.1$ \\
-			& steps & 10 & 20 & 10
-		\end{tabular}
-		
-	\end{ruledtabular}
-	\caption{Grid specifications for the brute force algorithm in the single-line fitting. First iteration is a coarse search and the second is more accurate.}
-	\label{tab:grid_tts}
-\end{table}
-
-Then, the second brute force is launched with contracted parameter ranges around the coarse optimum (see \autoref{tab:grid_tts}) and reduced $\Delta f = 50$ MHz. This search already is aimed to locate the near-optimal point in the parameter space. Importantly, this step may not find exactly the highest line $f_{ge}(I)$, but it certainly will find one of the lines that has the most points in it, i.e. $f_{gf/2}(I)$, and thus get an incorrect value for $f_{ge}^{max, (2)}$. This behaviour can't be overcome except than by fitting multiple lines at the same time. For the other two parameters $I_{ss}^{(2)}$ and $d^{(2)}$ there is no ambiguity, and they are estimated accurately.
-
-Finally, only the chosen points from the second brute force are used to fit the model using the Nelder-Mead algorithm which is allowed to polish not only the 3 resulting parameters from the second brute search but as well the period $\Pi^{(0)}$.
-
-\paragraph{Multi-line optimization}
-
-\begin{table}
-	\centering
-	\begin{ruledtabular}
-		\begin{tabular}{ccc} 
-			Parameter & Value range & Steps \# \\
-			\hline
-			$f_{ge}^{max}$ & $f_{ge}^{max, (3)}  \substack{+0.4\ \text{GHz} \\ -0.0\ \text{GHz}}$  & 10 \\
-			$\alpha$ & 0.2-0.3 GHz & 10 
-		\end{tabular} 
-	\end{ruledtabular}
-	\caption{Grid parameters for the multi-line brute search; $\Delta f = 50$ MHz for each line.}
-	\label{tab:tts_grid_multi}
-\end{table}
-
-With the optimal parameters $I_{ss}^{(3)}$, $f_{ge}^{max, (3)}$, $d^{(3)}$ and $\Pi^{(1)}$ from the single-line fitting, we perform multi-line optimization. It as well consists of a brute search and the Nelder-Mead minimization. The loss function is defined the same way, but now three or four spectral lines should be taken into account.
-
-This stage serves, firstly, to ensure the correct detection of the $ge$ transition as the highest visible spectral line and, secondly, to find the anharmonicity $\alpha$ of the qubit. For transmons, all the lines have the same shape and differ only by a constant frequency shift (see \autoref{fig:hough_illustration}). Since the single-line fitting procedure captures the shape of the line accurately, we only do the brute search upon the $f_{ge}^{max}$ and $\alpha$. The grid parameters may be found in \autoref{tab:tts_grid_multi}. We choose an asymmetric range for $f_{ge}^{max}$ to ensure that the line comb in \autoref{fig:hough_illustration} moves only upwards from the single-line solution and finds the highest visible line if that one was not detected by the previous procedure. Anharmonicity is swept in a range that is typical for this type of qubits.
-
-
-
 \section{Results}
 
 In this section, we discuss the performance and accuracy of the two algorithms described in the previous section. Firstly, we test the resonator spectrum recognition, and then the qubit spectrum detection algorithm.
-
-\subsection{Single-tone spectroscopy recognition}
 
 The algorithm was implemented in Python using the \textit{brute} and \textit{minimize} routines of the SciPy\cite{scipy} library. We present here three examples of the detection for all possible qubit-resonator dispositions.  The resulting fits are presented in \autoref{fig:anti_fit_cases} along with the original data and the error plots; we will further reference them as (a), (b) and (c). 
 
@@ -499,7 +367,7 @@ In \autoref{fig:anti_theor}(a) it is also possible to see the entire spectrum of
 
 We will use the model \eqref{eq:branches1}, \eqref{eq:branches2} to fit the resonator frequency that we can find in an experiment. The only conceptual problem for the fitting that is left now is that the function we want to use as a model is not single-valued. Indeed, in \autoref{fig:anti_theor}(a, top) for each value of magnetic flux we always find two frequency points corresponding to the qubit and to the resonator, respectively. However, in practice only a narrow scan around the resonator frequency such as in \autoref{fig:anti_theor}(a, bottom) is required, and thus no ambiguity occurs. 
 
-\bibliography{aipsamp}% Produces the bibliography via BibTeX.
+\bibliography{papers_bibliography}% Produces the bibliography via BibTeX.
 
 \end{document}
 %
