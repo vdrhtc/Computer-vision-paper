@@ -50,7 +50,7 @@
 
 \preprint{AIP/123-QED}
 
-\title[Automated analysis of spectroscopic data of cQED systems]{Automated analysis of spectroscopic data of cQED systems\\using computer vision~}
+\title[Automated analysis of single-tone spectroscopic data of cQED systems]{Automated analysis of single-tone spectroscopic data of cQED systems\\~}
 % Force line breaks with \\
 
 \author{G.Fedorov}
@@ -92,37 +92,35 @@ The proposed methods are accurate, fast and robust to noise, applicable to super
 
 The flow of an experiment that characterizes a single qubit on a chip is depicted schematically in \autoref{fig:detection}(a). It is similar to the classic procedures described in Refs. [\onlinecite{jerger2013, chen2018}] for measuring cQED samples with qubits of tunable frequency. For non-tunable qubits, a different algorithm of automatic calibration is described in the patent application Ref. [\onlinecite{bloom2018}].
 
-First of all, it is necessary to detect the positions of the resonance peaks corresponding to the readout resonators. Resonator search provides the scan range for the probe frequency $\Delta f_p$ in single-tone spectroscopy (STS). STS records the behaviour of the resonance peak while changing the magnetic field applied to the sample (controlled by some current $I$). By processing the results of the STS, one can estimate the qubit frequency depending on $I$ (this coarse estimation is denoted as  $f^{(0)}_{ge}(I)$). Conversely, the resonator frequency $f_r(I)$ and the coupling strength $g$  may be found accurately. Based on these results, one may set the scan range for the two-tone spectroscopy (TTS) in excitation frequency $\Delta f_{exc}$ and current $\Delta I$. Next, from TTS, we can obtain various qubit transition frequencies dependence on current $f_{ge}(I), f_{gf/2}(I),$ etc. with accuracy sufficient for pulsed experiments.  After that, pulsed calibrations may be started to optimize gate fidelities. In overall, the process is structured so that the results of one measurement define the parameters of the next, successively acquiring more accurate information about the physical system.
+First of all, it is necessary to detect the positions of the resonance peaks corresponding to the readout resonators. Resonator search provides the scan range for the probe frequency $\Delta f_p$ in single-tone spectroscopy (STS). STS records the behaviour of the resonance peak while changing the magnetic field applied to the sample (controlled by some current $I$). By processing the results of the STS, one can estimate the qubit frequency depending on $I$ (this coarse estimation is denoted as  $f^{(0)}_{ge}(I)$). Conversely, the resonator frequency $f_r(I)$ and the coupling strength $g$  may be found accurately. Based on these results, one may set the scan range for the two-tone spectroscopy (TTS) in excitation frequency $\Delta f_{exc}$ and current $\Delta I$. Next, from TTS, we can obtain the dependence of various qubit transition frequencies on current $f_{ge}(I), f_{gf/2}(I)$, etc. with accuracy sufficient for pulsed experiments. In overall, the process is structured so that the results of one measurement define the parameters of the next, successively acquiring more accurate information about the physical system.
 
 \begin{figure*}
 	\centering
-	\includegraphics[width=\linewidth]{detection}
-	\caption{(a) Common experiment flow for a tunable-frequency qubit: usually, three continuous wave spectroscopic measurements are performed before pulsed experiments, and each next experiment is based on the results of the previous ones. (b) Examples of the desired results after the detection for two qualitatively different STS outcomes. The heatmaps should be brought into correspondence with the 2D model curves. In the first row, two model curves that should be fitted simultaneously since the model is discontinuous. (c) Examples of the desired results after processing TTS data. The heatmap should be brought into correspondence with the model of the qubit spectrum which may not be single-valued since several transitions may be visible.}
+	\includegraphics[width=0.95\linewidth]{detection_sts}
+	\caption{(a) Common experiment flow for a tunable-frequency qubit: usually, three continuous wave spectroscopic measurements are performed before pulsed experiments, and each next experiment is based on the results of the previous ones. In the red dashed frame, the scope of this work is shown. (b) Examples of the desired results after the detection for three types of qualitatively different STS outcomes. The heatmaps should be brought into correspondence with the 2D model curves. In the first column, two model curves that should be fitted simultaneously since the model is discontinuous. Conversely, the second and the third images may be described by a single continuous curve; however, the model equations are different for these two cases.}
 	\label{fig:detection}	
 \end{figure*} 
 
-The measurement outcomes that contain information about the system properties may be divided in two groups: some results contain 1D curves (single-valued functions f(x)), and others contain 2D data (heatmap images, f(x,y)). The scope of this work is confined to the automatic analysis the latter results. In \autoref{fig:detection}(b,c) we illustrate examples of correlated measured data and the theoretical model. \autoref{fig:detection}(b) shows that STS data should be interpreted using two discontinuous curves (upper row) or a single continuous curve (lower row) that are defined by the model. Then, \autoref{fig:detection}(c) shows how qubit spectral lines should be detected. The main problems here are that, firstly, several spectral lines may be observed even for a single qubit (and thus the model is not single-valued), secondly, that spurious non-qubit transitions should be ignored, and, finally, the noise.
+The measurement outcomes that contain information about the system properties may be divided in two groups: some results contain 1D curves (single-valued functions f(x)), and others contain 2D data (heatmap images, f(x,y)). The scope of this work is confined to the automatic analysis the latter results; precisely, we are developing a computer vision system that is capable of extracting analytic data from STS images. In \autoref{fig:detection}(b) we illustrate some examples of correlated measured data and the theoretical model. \autoref{fig:detection}(b) shows that STS data should be interpreted using two discontinuous curves (upper row) or a single continuous curve (lower row) that are defined by the model. 
 
-The implementation of our methods relies on the theoretical description of the cQED systems and physical qubits; therefore, in Appendices \ref{sec:transmon} and \ref{sec:cqed} we derive all the necessary equations to form the model curves that are expected to appear in single- and two-tone spectroscopy. Without loss if generality, we use the transmon\cite{koch2007} with an asymmetric SQUID as a qubit; however, since our methods do not depend on the particular shape of the qubit transitions, for other types of qubits the logic will stay the same and there is no loss of generality.
+The implementation of our method relies on the theoretical description of the cQED systems and physical qubits; therefore, in Appendices \ref{sec:transmon} and \ref{sec:cqed} we derive all the necessary equations to form the model curves that are expected to appear in single- and two-tone spectroscopy. Without loss if generality, we use the transmon\cite{koch2007} with an asymmetric SQUID as a qubit; however, since our methods do not depend on the particular shape of the qubit transitions, for other types of qubits the logic will stay the same and there is no loss of generality.
 
 For the singe-tone spectroscopy, they model curves are (see \autoref{fig:detection}(b)):
 \begin{align}
 f_\pm(I) \equiv f_r(I) = \frac{f_c + f_{ge}(I)}{2} \pm \sqrt{g^2+(f_{ge}(I) - f_c)^2/4},\label{eq:f_r}
 \end{align}
-where $f_c$ stands for current-independent bare cavity frequency. Here we note that for the avoided crossings pattern both curves are necessary; alternatively, for the cases when the qubit is entirely below (above) the bare cavity frequency only $ f_+(I)\ \left(f_-(I)\right)$ is used. 
-
-For the two-tone spectroscopy, we take the dependence of the qubit transitions on current $f_{ge, gf/2, ef}(I)$ are expressed as
+where $f_c$ stands for current-independent bare cavity frequency. Here we note that for the avoided crossings pattern both curves are necessary; alternatively, for the cases when the qubit is entirely below (above) the bare cavity frequency only $ f_+(I)\ \left(f_-(I)\right)$ is used. The equations showing the dependence of the qubit transitions $f_{ge, gf/2, ef}(I)$ on current are expressed as
 \begin{equation}
 \begin{gathered}
 f_{ge}(I) = f_{ge}^{max} \left[\cos^2\left(\frac{\pi(I-I_{ss})}{\Pi}\right)+d^2 \sin^2 \left(\frac{\pi(I-I_{ss})}{\Pi}\right)\right]^\frac{1}{4}, \\
 f_{gf/2} = f_{ge} + \alpha/2,\ f_{ef}=f_{ge} + \alpha
 \end{gathered}\label{eq:tr_spectrum}
 \end{equation}
-where $\Phi_0$ is the flux quantum, $d$ is the SQUID asymmetry, $\alpha$ is the anharmonicity of the transmon equal to it's negative charging energy $-E_C$, and $f_{ge}^{max}$ is the qubit frequency at $I = I_{ss}$. $I_{ss}$ (sweet spot current) is the current exactly compensating the non-zero residual flux that is always present in experiment coming from the local magnetic fields on the chip. Finally, $\Pi$ is the period of the spectrum in current.
+where $\Phi_0$ is the flux quantum, $d$ is the SQUID asymmetry, $\alpha$ is the anharmonicity of the transmon equal to its negative charging energy $-E_C$, and $f_{ge}^{max}$ is the qubit frequency at $I = I_{ss}$. $I_{ss}$ (sweet spot current) is the current exactly compensating the non-zero residual flux that is always present in experiment coming from the local magnetic fields on the chip. Finally, $\Pi$ is the period of the spectrum in current.
 
-In overall, we have 6 fitting parameters for the single-tone  ($f_c$, $g$, $\Pi$, $I_{ss}$, $f_{ge}^{max}$, $d$) and  5 parameters for the two-tone spectroscopy ($\Pi$, $I_{ss}$, $f_{ge}^{max}$, $d$, $\alpha$).
+In overall, we have 6 fitting parameters for the single-tone spectroscopy ($f_c$, $g$, $\Pi$, $I_{ss}$, $f_{ge}^{max}$, $d$).
 
-The structure of the rest of the paper is as follows. First, we will describe our methods to process STS data and to detect qubit spectral lines on TTS data. Next, the accuracy, performance and reliability of both algorithms will be addressed. Finally, we discuss the limitations, possible applications and future work. 
+The structure of the rest of the paper is as follows. First, we describe our methods to extract the Hamiltonian parameters from STS data. Next, the accuracy, performance and reliability of the algorithm is addressed;finally, we discuss the limitations of the algorithm, further applications and future work. 
 
 
 
