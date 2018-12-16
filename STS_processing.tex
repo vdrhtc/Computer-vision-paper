@@ -19,8 +19,11 @@
 %
 % Use this file as a source of example code for your aip document.
 % Use the file aiptemplate.tex as a template for your document.
+
+\RequirePackage{graphicx} % this line is required to see pics in draft mode
 \documentclass[%
  aip,
+ draft,
 % jmp,
 % bmf,
 % sd,
@@ -45,6 +48,7 @@
 \usepackage{amsmath}
 \usepackage{multirow}
 \usepackage{makecell}
+\usepackage[inline, nomargin]{fixme}
 \graphicspath{{Pictures/}}
 \begin{document}
 
@@ -60,7 +64,7 @@
 Russian Quantum Center, Skolkovo village, Russia
 }%
 \affiliation{ 
-Moscow Institute of Physics and Technology, Dolgoprundiy, Russia
+Moscow Institute of Physics and Technology, Dolgoprudny, Russia
 }%
 
 \author{A. Ustinov}
@@ -75,6 +79,7 @@ Karlsruhe Institute of Technology, Karlsruhe, Germany
              %  but any date may be explicitly specified
 
 \begin{abstract}
+\fxfatal{Is abstract supposed to be re-written completely?}	
 To build a full-scale quantum processor it is necessary to automate as many steps as possible on the physical, hardware level. Circuit quantum electrodynamics (cQED) is a contemporary architecture for dispersive readout and Purcell protection of superconducting qubits of various types, and thus it is necessary to develop software that is able to perform every kind of automatic calibration of such systems from scratch without any human participation. An important step towards this goal is to build a noise-insensitive and accurate computer vision tool to process three-dimensional spectroscopic data. In this work, we present and describe two scalable algorithms that are able to extract the Hamiltonian parameters of the cQED systems from spectroscopic data. 
 \end{abstract}
 
@@ -82,34 +87,34 @@ To build a full-scale quantum processor it is necessary to automate as many step
 
  \renewcommand*{\figureautorefname}{Fig.}
 
-\section{\label{sec:level1} Introduction}
+\section{Introduction} \label{sec:level1} 
 
-Computation on a quantum computer involves operating large numbers of physical quantum bits (qubits). One of the most significant challenges is that today’s qubit systems are not produced identical and cannot be operated identically\cite{kelly2018, chen2018}: typically, control parameters for a device are determined by following a sequence of calibration experiments, and vary among the devices. Since manual tuning of these parameters is not a scalable solution, operating a few dozens of qubits requires developing an autonomous system able to handle the physical device calibration on its own. Moreover, a lot of research is still being done to find the optimal chip designs and fabrication methods. This research includes gathering statistics on many different samples that should be measured and consistently evaluated. An automated tool not only will speed up this process, but as well exclude human error.
+Computation on a quantum computer involves operating large numbers of physical quantum bits (qubits). One of the most significant challenges is that qubit systems are not produced identical and cannot be operated identically\cite{kelly2018, chen2018}: typically, control parameters for a device are determined by following a sequence of calibration experiments, and vary among the devices. It is already understood that manual tuning of these parameters is not a viable solution and operating a few dozens of qubits requires developing an autonomous system able to handle the physical device calibration on its own. Moreover, a lot of research is still being done to find the optimal chip designs and fabrication methods. This research includes gathering statistics on many different samples that should be measured and consistently evaluated. An automated tool not only will speed up this process, but as well exclude human error.
 
 In this work, we are proposing and implementing several methods of data processing and computer vision that aid automatic calibration of circuit QED\cite{blais2007} architectures used to read out superconducting qubits' states. Computer vision is understood here as an enterprise that uses statistical methods to disentangle data using models constructed with the aid of geometry, physics, and learning theory\cite{forsyth2011}. As it will be shown below the output of circuit calibration is almost always an image and it is hardly possible to automatically extract the required information from it without resorting to methods of computer vision.
 
-The proposed methods are accurate, fast and robust to noise, applicable to superconducting qubits with a periodic and parametrizable spectrum, and compatible with the state-of-the-art paradigm of one readout resonator per one qubit\cite{versluis2017, kelly2015}. Therefore, the suggested approach is scalable and can be applied to processors with any number of qubits.
+The proposed methods are accurate, fast and robust to noise, applicable to superconducting qubits with a periodic and parametrizable\fxnote{What does 'parametrizable' mean?} spectrum, and compatible with the paradigm of one readout resonator per one qubit\cite{versluis2017, kelly2015}. Also the proposed methods are scalable and can be applied to processors with dozens of qubits.
 
-The flow of an experiment that characterizes a single qubit on a chip is depicted schematically in \autoref{fig:detection}(a). It is similar to the classic procedures described in Refs. [\onlinecite{jerger2013, chen2018}] for measuring cQED samples with qubits of tunable frequency. For non-tunable qubits, a different algorithm of automatic calibration is described in the patent application Ref. [\onlinecite{bloom2018}].
+The flow of an experiment that characterizes a single qubit\fxnote{Earlier your were talking about dozens of qubits and then a sudden jump to a single qubit - is some linking wording missing? } on a chip is depicted schematically in \autoref{fig:detection}(a). It is similar to the  procedures described in Refs. [\onlinecite{jerger2013, chen2018}] for measuring cQED samples with qubits of tunable frequency. For non-tunable qubits, a different algorithm of automatic calibration is described in the patent application Ref. [\onlinecite{bloom2018}].
 
-First of all, it is necessary to detect the positions of the resonance peaks corresponding to the readout resonators. Resonator search provides the scan range for the probe frequency $\Delta f_p$ in single-tone spectroscopy (STS). STS records the behaviour of the resonance peak while changing the magnetic field applied to the sample (controlled by some current $I$). By processing the results of the STS, one can estimate the qubit frequency depending on $I$ (this coarse estimation is denoted as  $f^{(0)}_{ge}(I)$). Conversely, the resonator frequency $f_r(I)$ and the coupling strength $g$  may be found accurately. Based on these results, one may set the scan range for the two-tone spectroscopy (TTS) in excitation frequency $\Delta f_{exc}$ and current $\Delta I$. Next, from TTS, we can obtain the dependence of various qubit transition frequencies on current $f_{ge}(I), f_{gf/2}(I)$, etc. with accuracy sufficient for pulsed experiments. In overall, the process is structured so that the results of one measurement define the parameters of the next, successively acquiring more accurate information about the physical system.
+First of all, it is necessary to detect the positions\fxnote{In terms of what? Frequency? Coil current?} of the resonance peaks corresponding to the readout resonators. A resonator search step provides the scan range for the probe frequency $\Delta f_p$ in the next step - single-tone spectroscopy (STS). STS records the behavior of the resonance peak while changing the magnetic field applied to the sample (controlled by some current $I$). By processing the results of the STS, one can get a coarse estimate of the qubit frequency depending on $I$  denoted as  $f^{(0)}_{ge}(I)$ and accurate estimates of the resonator frequency $f_r(I)$ and the coupling strength $g$. Based on these results, one may set the scan range for the two-tone spectroscopy (TTS) in excitation frequency $\Delta f_{exc}$ and current $\Delta I$. Next, from TTS, one can obtain the dependence of various qubit transition frequencies on current $f_{ge}(I), f_{gf/2}(I)$, etc.\fxnote{Wouldn't it be better to say that from TTS one can get more precise estimate of qubit frequency $f^{(1)}_{ge}(I)$? Notation will be consistent as well as thought flow} with accuracy sufficient for pulsed experiments. In overall, the process is structured so that the results of one measurement step define the parameters of the next step, successively acquiring more accurate information about the physical system.
 
 \begin{figure*}
 	\centering
 	\includegraphics[width=0.95\linewidth]{detection_sts}
-	\caption{(a) Common experiment flow for a tunable-frequency qubit: usually, three continuous wave spectroscopic measurements are performed before pulsed experiments, and each next experiment is based on the results of the previous ones. In the red dashed frame, the scope of this work is shown. (b) Examples of the desired results after the detection for three types of qualitatively different STS outcomes. The heatmaps should be brought into correspondence with the 2D model curves. In the first column, two model curves that should be fitted simultaneously since the model is discontinuous. Conversely, the second and the third images may be described by a single continuous curve; however, the model equations are different for these two cases.}
+	\caption{(a) Common experiment flow for a tunable-frequency qubit: usually, single- and two-tone spectroscopic measurements are performed before pulsed experiments, and each next experiment is based on the results of the previous ones. In the red dashed frame, the scope of this work is shown. (b) Examples of the desired results after the detection for three types of qualitatively different STS outcomes. The heatmaps should be brought into correspondence with the 2D model curves. In the first column so called avoided crossing pattern is shown. Two model curves has to be fitted simultaneously since the model is discontinuous. Conversely, the second and third images may be described by a single continuous curve; however, the model equations are different for these two cases.}
 	\label{fig:detection}	
 \end{figure*} 
 
-The measurement outcomes that contain information about the system properties may be divided in two groups: some results contain 1D curves (single-valued functions f(x)), and others contain 2D data (heatmap images, f(x,y)). The scope of this work is confined to the automatic analysis the latter results; precisely, we are developing a computer vision system that is capable of extracting analytic data from STS images. In \autoref{fig:detection}(b) we illustrate some examples of correlated measured data and the theoretical model. \autoref{fig:detection}(b) shows that STS data should be interpreted using two discontinuous curves (upper row) or a single continuous curve (lower row) that are defined by the model. 
+The measurement outcomes that contain information about the system properties may be divided in two groups: some results contain 1D curves (single-valued functions f(x)), and others contain 2D data (heatmap images, f(x,y))\fxnote{2D curves and 3D data (heatmap?)}. The scope of this work is confined to the automatic analysis the latter results; precisely, we are developing a computer vision system that is capable of extracting analytic data from STS images. In \autoref{fig:detection}(b) we illustrate two types of correlated measured data and the theoretical model: STS data has to be interpreted either using two discontinuous curves (upper row) or a single continuous curve (lower row) that are defined by the model. 
 
-The implementation of our method relies on the theoretical description of the cQED systems and physical qubits; therefore, in Appendices \ref{sec:transmon} and \ref{sec:cqed} we derive all the necessary equations to form the model curves that are expected to appear in single- and two-tone spectroscopy. Without loss if generality, we use the transmon\cite{koch2007} with an asymmetric SQUID as a qubit; however, since our methods do not depend on the particular shape of the qubit transitions, for other types of qubits the logic will stay the same and there is no loss of generality.
+The implementation of our method depends on the theoretical description of the cQED systems and physical qubits; therefore, in Appendices \ref{sec:transmon} and \ref{sec:cqed} we derive all the necessary equations to form the model curves that are expected to appear in single-tone spectroscopy \fxnote{Have you removed two-tone spectroscopy from Appendices?}. Without loss if generality, we use the transmon\cite{koch2007} with an asymmetric SQUID as a qubit; however, since our methods do not depend on the particular shape of the qubit transitions, for other types of qubits the logic will stay the same and there is no loss of generality.
 
 For the singe-tone spectroscopy, they model curves are (see \autoref{fig:detection}(b)):
 \begin{align}
 f_\pm(I) \equiv f_r(I) = \frac{f_c + f_{ge}(I)}{2} \pm \sqrt{g^2+(f_{ge}(I) - f_c)^2/4},\label{eq:f_r}
 \end{align}
-where $f_c$ stands for current-independent bare cavity frequency. Here we note that for the avoided crossings pattern both curves are necessary; alternatively, for the cases when the qubit is entirely below (above) the bare cavity frequency only $ f_+(I)\ \left(f_-(I)\right)$ is used. The equations showing the dependence of the qubit transitions $f_{ge, gf/2, ef}(I)$ on current are expressed as
+where $f_c$ stands for current-independent bare cavity frequency. Here we note that for the avoided crossings pattern both curves are necessary; alternatively, for the cases when the qubit is entirely below (above) the bare cavity frequency only $ f_+(I)\ \left(f_-(I)\right)$ is used. The equations \fxnote{Let's remove $f_{gf/2, ef}(I)$ for they are not used?}showing the dependence of the qubit transitions $f_{ge, gf/2, ef}(I)$ on current are expressed as
 \begin{equation}
 \begin{gathered}
 f_{ge}(I) = f_{ge}^{max} \left[\cos^2\left(\frac{\pi(I-I_{ss})}{\Pi}\right)+d^2 \sin^2 \left(\frac{\pi(I-I_{ss})}{\Pi}\right)\right]^\frac{1}{4}, \\
@@ -120,7 +125,7 @@ where $\Phi_0$ is the flux quantum, $d$ is the SQUID asymmetry, $\alpha$ is the 
 
 In overall, we have 6 fitting parameters for the single-tone spectroscopy ($f_c$, $g$, $\Pi$, $I_{ss}$, $f_{ge}^{max}$, $d$).
 
-The structure of the rest of the paper is as follows. First, we describe our methods to extract the Hamiltonian parameters from STS data. Next, the accuracy, performance and reliability of the algorithm is addressed;finally, we discuss the limitations of the algorithm, further applications and future work. 
+The structure of the rest of the paper is as follows. First, we describe our methods to extract the Hamiltonian\fxwarning{What Hamiltonian??} parameters from STS data. Next, the accuracy, performance and reliability of the algorithm is addressed;finally, we discuss the limitations of the algorithm, further applications and future work. 
 
 
 
@@ -128,16 +133,16 @@ The structure of the rest of the paper is as follows. First, we describe our met
 
 In this section, we describe the approaches towards extraction of Hamiltonian parameters from the two types of spectroscopic measurement results. Additionally, we describe important peculiarities of the data itself and some essential experimental details.
 
-Usually, in the experiment the spectrum of the readout resonator is recorded using a vector network analyzer (VNA).  The VNA measures a complex scattering parameter $S_{ij}$ for a range of probe frequencies $\Delta f_p$ around the resonance. Hence, one VNA scan may be represented as two 1D plots for the amplitude $|S_{ij}(f_p)|$ and the phase $\angle S_{ij}(f_p)$ of the scattering parameter. When the magnetic flux sweep is added, the data becomes three-dimensional and has to be represented visually using two heatmap plots for $|S_{ij}(f_p, I)|$ and $\angle S_{ij}(f_p, I)$. In \autoref{fig:anti_exp}(a) one can find an experimental heatmap from our database for a notch-type (side-coupled) coplanar waveguide resonator coupled to a tunable transmon qubit. Only the amplitude $|S_{21}(f_p, I)|$ is shown.
+Usually, in the experiment the spectrum of the readout resonator is recorded using a vector network analyzer (VNA).  The VNA measures a complex scattering parameter $S_{ij}$ \fxnote{It should be explained why you are starting from $S_{ij}$ (i.e. to produce heatmap from which $f_r$ will be extracted etc.)}\fxnote{It is not clear what \emph{ij} are standing for in $S_{ij}$. Few paragraphs later they are suddenly equal to 21 - should it mean something?} for a range of probe frequencies $\Delta f_p$ around the resonance. Hence, one VNA scan may be represented as two 1D plots for the amplitude $|S_{ij}(f_p)|$ and the phase $\angle S_{ij}(f_p)$ of the scattering parameter. When the magnetic flux sweep is added, the data becomes three-dimensional and has to be represented visually using two heatmap plots for $|S_{ij}(f_p, I)|$ and $\angle S_{ij}(f_p, I)$. In \autoref{fig:anti_exp}(a) one can find an experimental heatmap from our database for a notch-type (side-coupled) coplanar waveguide resonator coupled to a tunable transmon qubit. Only the amplitude $|S_{21}(f_p, I)|$ is shown.\fxnote{x-axis label on \autoref{fig:anti_exp} should be aligned with text: $I$ instead of  coil current?}
 \begin{figure}[h!]
 \includegraphics[width=\linewidth]{anti_subplots}
 \caption{(a) An experimental spectrum of a resonator strongly coupled to a transmon qubit depending on the coil current $I$. (b) Slices of the transmission from (a) showing two slices with fits (1,3) and a plateau with no dip (2) present. (c) Extracted data (blue dots) and mean frequency value over all points $\langle f_r \rangle_{I}$ (black dashed line). Grey arrows show where $f_r - \langle f_r \rangle_{I}$ changes sign.}
 \label{fig:anti_exp}
 \end{figure}
 
-To extract the Hamiltonian parameters, we propose to fit the model \eqref{eq:f_r} to the data in \autoref{fig:anti_exp}(a) in the sense of maximum likelihood. However, as one can see, the data are much more complex than the model as it contain an extra dimension. Even after the dimensionality reduction procedure (described below), the fitting is not a trivial task because the maximum likelihood estimation implicates global optimization. The situation is even more complicated since the we need to solve an optimization problem with an ill-defined loss function (i.e. in the least squares algorithm). This is so, firstly, due to the periodic dependence of the frequencies on current $I$ and the unknown position of the qubit sweet spot $I_{ss}$ and, secondly, due to the strongly non-linear dependence of the model on other parameters. Fortunately, it is possible to get a good initial guess for $\Pi$ and $I_{ss}$ parameters and then brute force the solution in other variables since we have well defined bounds for each of them. Finally, we can polish the result in all six parameters using a local optimizer.
+To extract the Hamiltonian parameters, we propose to fit the model \eqref{eq:f_r} to the data in \autoref{fig:anti_exp}(a) in the sense of maximum likelihood. However, as one can see, the data are much more complex than the model as it contain an extra dimension\fxwarning{Which dimension? 3-d dimension in heatmap? Why does it makes the task 'much more complex'?}. Even after the dimensionality reduction procedure (described below), the fitting is not a trivial task because the maximum likelihood estimation implicates global optimization.\fxnote{You are trying to say that the difficulty is for the loss function has many local minimums, aren't you?} The situation is even more complicated since the we need to solve an optimization problem with an ill-defined\fxnote{Again, it would be better to say that the loss function is non-linear with many local minima and many parameters rather than ill-defined} loss function (i.e. in the least squares algorithm). This is so, firstly, due to the periodic dependence of the frequencies on current $I$ and the unknown position of the qubit sweet spot $I_{ss}$ and, secondly, due to the strongly non-linear dependence of the model on other parameters. Fortunately, it is possible to get a good initial guess for $\Pi$ and $I_{ss}$ parameters and then brute force search the solution in other variables since we have well defined bounds for each of them. Finally, we can polish the result in all six parameters using a local optimizer.
 
-An outline of the method which uses \autoref{fig:anti_exp}(a) as an example is presented below. The chosen type of the resonator-qubit arrangement which yields the avoided crossings pattern is not universal: there are two other cases when the qubit spectrum lies entirely below or above the resonator frequency; however, they are treated exactly the same way and are simpler in terms of the loss function behaviour.
+An outline of the method which uses \autoref{fig:anti_exp}(a) as an example is presented below. As it has already been mentioned, the chosen type of the resonator-qubit arrangement which yields the avoided crossings pattern is not unique: there are two other cases when the qubit spectrum lies entirely below or above the resonator frequency; however, they are treated exactly the same way and are simpler in terms of the loss function behaviour.
 
 \subsection{Extracting $f_r(I)$ from data}\label{sec:extract_fr}
 
@@ -366,7 +371,7 @@ In \autoref{fig:anti_theor}(a) it is also possible to see the entire spectrum of
 We will use the model \eqref{eq:branches1}, \eqref{eq:branches2} to fit the resonator frequency that we can find in an experiment. The only conceptual problem for the fitting that is left now is that the function we want to use as a model is not single-valued. Indeed, in \autoref{fig:anti_theor}(a, top) for each value of magnetic flux we always find two frequency points corresponding to the qubit and to the resonator, respectively. However, in practice only a narrow scan around the resonator frequency such as in \autoref{fig:anti_theor}(a, bottom) is required, and thus no ambiguity occurs. 
 
 \bibliography{papers_bibliography}% Produces the bibliography via BibTeX.
-
+\listoffixmes
 \end{document}
 %
 % ****** End of file aipsamp.tex ******
