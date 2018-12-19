@@ -93,11 +93,11 @@ Computation on a quantum computer involves operating large numbers of physical q
 
 In this work, we are proposing and implementing several methods of data processing and computer vision that aid automatic calibration of circuit QED\cite{blais2007} architectures used to read out superconducting qubits' states. Computer vision is understood here as an enterprise that uses statistical methods to disentangle data using models constructed with the aid of geometry, physics, and learning theory\cite{forsyth2011}. As it will be shown below the output of circuit calibration is almost always an image and it is hardly possible to automatically extract the required information from it without resorting to methods of computer vision.
 
-The proposed methods are accurate, fast and robust to noise, applicable to superconducting qubits with a periodic and parametrizable\fxnote{What does 'parametrizable' mean?} spectrum, and compatible with the paradigm of one readout resonator per one qubit\cite{versluis2017, kelly2015}. Also the proposed methods are scalable and can be applied to processors with dozens of qubits.
+The proposed methods are accurate, fast and robust to noise, applicable to superconducting qubits with a periodic spectrum described with a closed form model equations, and compatible with the paradigm of one readout resonator per one qubit\cite{versluis2017, kelly2015}.
 
-The flow of an experiment that characterizes a single qubit\fxnote{Earlier your were talking about dozens of qubits and then a sudden jump to a single qubit - is some linking wording missing? } on a chip is depicted schematically in \autoref{fig:detection}(a). It is similar to the  procedures described in Refs. [\onlinecite{jerger2013, chen2018}] for measuring cQED samples with qubits of tunable frequency. For non-tunable qubits, a different algorithm of automatic calibration is described in the patent application Ref. [\onlinecite{bloom2018}].
+The flow of an experiment that characterizes a single qubit-resonator cell of a quantum processor chip is depicted schematically in \autoref{fig:detection}(a). It is similar to the  procedures described in Refs. [\onlinecite{jerger2013, chen2018}] for measuring cQED samples with qubits of tunable frequency. For non-tunable qubits, a different algorithm of automatic calibration is described in the patent application Ref. [\onlinecite{bloom2018}].
 
-First of all, it is necessary to detect the positions\fxnote{In terms of what? Frequency? Coil current?} of the resonance peaks corresponding to the readout resonators. A resonator search step provides the scan range for the probe frequency $\Delta f_p$ in the next step - single-tone spectroscopy (STS). STS records the behavior of the resonance peak while changing the magnetic field applied to the sample (controlled by some current $I$). By processing the results of the STS, one can get a coarse estimate of the qubit frequency depending on $I$  denoted as  $f^{(0)}_{ge}(I)$ and accurate estimates of the resonator frequency $f_r(I)$ and the coupling strength $g$. Based on these results, one may set the scan range for the two-tone spectroscopy (TTS) in excitation frequency $\Delta f_{exc}$ and current $\Delta I$. Next, from TTS, one can obtain the dependence of various qubit transition frequencies on current $f_{ge}(I), f_{gf/2}(I)$, etc.\fxnote{Wouldn't it be better to say that from TTS one can get more precise estimate of qubit frequency $f^{(1)}_{ge}(I)$? Notation will be consistent as well as thought flow} with accuracy sufficient for pulsed experiments. In overall, the process is structured so that the results of one measurement step define the parameters of the next step, successively acquiring more accurate information about the physical system.
+First of all, it is necessary to locate the resonance peaks corresponding to the readout resonators. The resonator search step then provides the scan range for the probe frequency $\Delta f_p$ in the next step: single-tone spectroscopy (STS). STS tracks the frequency shifts of the resonance peak while changing the magnetic field applied to the sample (controlled by some current $I$). By processing the results of the STS, one can get a coarse estimate of the qubit frequency depending on $I$  denoted as  $f^{(0)}_{ge}(I)$ and accurate estimates of the resonator frequency $f_r(I)$ and the coupling strength $g$. Based on these results, one may set the scan range for the two-tone spectroscopy (TTS) in excitation frequency $\Delta f_{exc}$ and current $\Delta I$. Finally, by processing TTS result, one can obtain the precise dependence of the qubit $ge$ transition frequency on current $f_{ge}(I)$, and other transition frequencies ($f_{gf/2}(I)$, etc.) with accuracy sufficient for pulsed experiments. In overall, the process is structured so that the results of one measurement step define the parameters of the next step, successively acquiring more accurate information about the physical system.
 
 \begin{figure*}
 	\centering
@@ -106,26 +106,24 @@ First of all, it is necessary to detect the positions\fxnote{In terms of what? F
 	\label{fig:detection}	
 \end{figure*} 
 
-The measurement outcomes that contain information about the system properties may be divided in two groups: some results contain 1D curves (single-valued functions f(x)), and others contain 2D data (heatmap images, f(x,y))\fxnote{2D curves and 3D data (heatmap?)}. The scope of this work is confined to the automatic analysis the latter results; precisely, we are developing a computer vision system that is capable of extracting analytic data from STS images. In \autoref{fig:detection}(b) we illustrate two types of correlated measured data and the theoretical model: STS data has to be interpreted either using two discontinuous curves (upper row) or a single continuous curve (lower row) that are defined by the model. 
+The measurement outcomes that contain information about the system properties may be divided in two groups: some results contain curves (data are 1D manifolds), and others contain heatmap images (2D manifolds). The scope of this work is confined to the automatic analysis the latter results; precisely, we are developing a computer vision system that is capable of extracting analytic data from STS images. In \autoref{fig:detection}(b) we illustrate two types of correlated measured data and the theoretical model: STS data has to be interpreted either using two discontinuous curves (upper row) or a single continuous curve (lower row) that are defined by the model. 
 
-The implementation of our method depends on the theoretical description of the cQED systems and physical qubits; therefore, in Appendices \ref{sec:transmon} and \ref{sec:cqed} we derive all the necessary equations to form the model curves that are expected to appear in single-tone spectroscopy \fxnote{Have you removed two-tone spectroscopy from Appendices?}. Without loss if generality, we use the transmon\cite{koch2007} with an asymmetric SQUID as a qubit; however, since our methods do not depend on the particular shape of the qubit transitions, for other types of qubits the logic will stay the same and there is no loss of generality.
+The implementation of our method depends on the theoretical description of the cQED systems and physical qubits; therefore, in Appendices \ref{sec:transmon} and \ref{sec:cqed} we derive all the necessary equations to form the model curves that are expected to appear in single-tone spectroscopy. Without loss if generality, we use the transmon\cite{koch2007} with an asymmetric SQUID as a qubit; however, since our methods do not depend on the particular shape of the qubit transitions, for other types of qubits the logic will stay the same and there is no loss of generality.
 
 For the singe-tone spectroscopy, they model curves are (see \autoref{fig:detection}(b)):
 \begin{align}
 f_\pm(I) \equiv f_r(I) = \frac{f_c + f_{ge}(I)}{2} \pm \sqrt{g^2+(f_{ge}(I) - f_c)^2/4},\label{eq:f_r}
 \end{align}
-where $f_c$ stands for current-independent bare cavity frequency. Here we note that for the avoided crossings pattern both curves are necessary; alternatively, for the cases when the qubit is entirely below (above) the bare cavity frequency only $ f_+(I)\ \left(f_-(I)\right)$ is used. The equations \fxnote{Let's remove $f_{gf/2, ef}(I)$ for they are not used?}showing the dependence of the qubit transitions $f_{ge, gf/2, ef}(I)$ on current are expressed as
+where $f_c$ stands for current-independent bare cavity frequency. Here we note that for the avoided crossings pattern both curves are necessary; alternatively, for the cases when the qubit is entirely below (above) the bare cavity frequency only $ f_+(I)\ \left(f_-(I)\right)$ is used. The equations showing the dependence of the qubit transitions $f_{ge}(I)$ on current are expressed as
 \begin{equation}
-\begin{gathered}
-f_{ge}(I) = f_{ge}^{max} \left[\cos^2\left(\frac{\pi(I-I_{ss})}{\Pi}\right)+d^2 \sin^2 \left(\frac{\pi(I-I_{ss})}{\Pi}\right)\right]^\frac{1}{4}, \\
-f_{gf/2} = f_{ge} + \alpha/2,\ f_{ef}=f_{ge} + \alpha
-\end{gathered}\label{eq:tr_spectrum}
+f_{ge}(I) = f_{ge}^{max} \left[\cos^2\left(\frac{\pi(I-I_{ss})}{\Pi}\right)+d^2 \sin^2 \left(\frac{\pi(I-I_{ss})}{\Pi}\right)\right]^\frac{1}{4},
+\label{eq:tr_spectrum}
 \end{equation}
-where $\Phi_0$ is the flux quantum, $d$ is the SQUID asymmetry, $\alpha$ is the anharmonicity of the transmon equal to its negative charging energy $-E_C$, and $f_{ge}^{max}$ is the qubit frequency at $I = I_{ss}$. $I_{ss}$ (sweet spot current) is the current exactly compensating the non-zero residual flux that is always present in experiment coming from the local magnetic fields on the chip. Finally, $\Pi$ is the period of the spectrum in current.
+where $\Phi_0$ is the flux quantum, $d$ is the SQUID asymmetry and $f_{ge}^{max}$ is the qubit frequency at $I = I_{ss}$. $I_{ss}$ (sweet spot current) is the current exactly compensating the non-zero residual flux that is always present in experiment coming from the local magnetic fields on the chip. Finally, $\Pi$ is the period of the spectrum in current.
 
 In overall, we have 6 fitting parameters for the single-tone spectroscopy ($f_c$, $g$, $\Pi$, $I_{ss}$, $f_{ge}^{max}$, $d$).
 
-The structure of the rest of the paper is as follows. First, we describe our methods to extract the Hamiltonian\fxwarning{What Hamiltonian??} parameters from STS data. Next, the accuracy, performance and reliability of the algorithm is addressed;finally, we discuss the limitations of the algorithm, further applications and future work. 
+The structure of the rest of the paper is as follows. First, we describe our methods to extract the system physical parameters from the STS data. Next, the accuracy, performance and reliability of the algorithm is addressed; finally, we discuss the limitations of the algorithm, further applications and future work. 
 
 
 
@@ -133,14 +131,15 @@ The structure of the rest of the paper is as follows. First, we describe our met
 
 In this section, we describe the approaches towards extraction of Hamiltonian parameters from the two types of spectroscopic measurement results. Additionally, we describe important peculiarities of the data itself and some essential experimental details.
 
-Usually, in the experiment the spectrum of the readout resonator is recorded using a vector network analyzer (VNA).  The VNA measures a complex scattering parameter $S_{ij}$ \fxnote{It should be explained why you are starting from $S_{ij}$ (i.e. to produce heatmap from which $f_r$ will be extracted etc.)}\fxnote{It is not clear what \emph{ij} are standing for in $S_{ij}$. Few paragraphs later they are suddenly equal to 21 - should it mean something?} for a range of probe frequencies $\Delta f_p$ around the resonance. Hence, one VNA scan may be represented as two 1D plots for the amplitude $|S_{ij}(f_p)|$ and the phase $\angle S_{ij}(f_p)$ of the scattering parameter. When the magnetic flux sweep is added, the data becomes three-dimensional and has to be represented visually using two heatmap plots for $|S_{ij}(f_p, I)|$ and $\angle S_{ij}(f_p, I)$. In \autoref{fig:anti_exp}(a) one can find an experimental heatmap from our database for a notch-type (side-coupled) coplanar waveguide resonator coupled to a tunable transmon qubit. Only the amplitude $|S_{21}(f_p, I)|$ is shown.\fxnote{x-axis label on \autoref{fig:anti_exp} should be aligned with text: $I$ instead of  coil current?}
+In \autoref{fig:anti_exp}(a), we show as an example a full experimental result obtained by STS for a notch-type (side-coupled) coplanar waveguide resonator coupled to a tunable transmon qubit. There, the absolute value of the complex scattering parameter $S_{21}$ between ports 1 and 2 of the sample is shown in colour, and the axes show corresponding the probe frequency and current values for which $S_{21}$ was recorded. We note that depending on the sample configuration one may measure, in general, any scattering parameter $S_{ij}$. An important fact is that for other kinds of the readout resonators the phase $\angle S_{ij}(f_p)$ should be used instead of the amplitude $|S_{21}|$. While the amplitude has a local minimum at resonance, the phase would have a maximum of its derivative.
+
 \begin{figure}[h!]
 \includegraphics[width=\linewidth]{anti_subplots}
 \caption{(a) An experimental spectrum of a resonator strongly coupled to a transmon qubit depending on the coil current $I$. (b) Slices of the transmission from (a) showing two slices with fits (1,3) and a plateau with no dip (2) present. (c) Extracted data (blue dots) and mean frequency value over all points $\langle f_r \rangle_{I}$ (black dashed line). Grey arrows show where $f_r - \langle f_r \rangle_{I}$ changes sign.}
 \label{fig:anti_exp}
 \end{figure}
 
-To extract the Hamiltonian parameters, we propose to fit the model \eqref{eq:f_r} to the data in \autoref{fig:anti_exp}(a) in the sense of maximum likelihood. However, as one can see, the data are much more complex than the model as it contain an extra dimension\fxwarning{Which dimension? 3-d dimension in heatmap? Why does it makes the task 'much more complex'?}. Even after the dimensionality reduction procedure (described below), the fitting is not a trivial task because the maximum likelihood estimation implicates global optimization.\fxnote{You are trying to say that the difficulty is for the loss function has many local minimums, aren't you?} The situation is even more complicated since the we need to solve an optimization problem with an ill-defined\fxnote{Again, it would be better to say that the loss function is non-linear with many local minima and many parameters rather than ill-defined} loss function (i.e. in the least squares algorithm). This is so, firstly, due to the periodic dependence of the frequencies on current $I$ and the unknown position of the qubit sweet spot $I_{ss}$ and, secondly, due to the strongly non-linear dependence of the model on other parameters. Fortunately, it is possible to get a good initial guess for $\Pi$ and $I_{ss}$ parameters and then brute force search the solution in other variables since we have well defined bounds for each of them. Finally, we can polish the result in all six parameters using a local optimizer.
+To extract the Hamiltonian parameters, we propose to fit the model \eqref{eq:f_r} to the data in \autoref{fig:anti_exp}(a) in the sense of maximum likelihood. However, as one can see, the data are more complex than the model as they contain an extra dimension: the model is a one-dimensional manifold while the data have two dimensions, and it is then not clear how to compare them. We solve this problem by a special dimensionality reduction procedure (described below), but even after that the fitting is not a trivial task because the maximum likelihood estimation implicates global optimization of an ill-defined loss function. It is so, firstly, due to the periodic dependence of the frequencies on current $I$ and the unknown position of the qubit sweet spot $I_{ss}$ and, secondly, due to the strongly non-linear dependence of the model on other parameters. Fortunately, it is possible to get a good initial guess for $\Pi$ and $I_{ss}$ parameters and then brute force search the solution in other variables since we have well defined bounds for each of them. Finally, we can polish the result in all six parameters using a local optimizer.
 
 An outline of the method which uses \autoref{fig:anti_exp}(a) as an example is presented below. As it has already been mentioned, the chosen type of the resonator-qubit arrangement which yields the avoided crossings pattern is not unique: there are two other cases when the qubit spectrum lies entirely below or above the resonator frequency; however, they are treated exactly the same way and are simpler in terms of the loss function behaviour.
 
@@ -180,14 +179,15 @@ To distinguish between these two cases when the noise is not too large, one may 
 
 \subsection{Full model fitting}
 
+
 \begin{figure}
-\centering
-\includegraphics[width=\linewidth]{loss1}
-\caption{Slices of the loss function \eqref{eq:loss} for the full model and experimental data from the example made around the optimal point. Root-mean-square per-point loss $\sqrt{\mathcal{L}}$ is in MHz. (a) $f_{ge}^{max}$ and $d$ are varied, other parameters optimal. A large valley is located near 9 GHz, and some smaller locally minimal ones are present all around. (b) $g$ and $f_r$ are varied, others optimal. The loss function for these two parameters is well-conditioned near the optimum. (c) Period $\Pi_{f_r} = \Phi_0/M$ and $\Phi_r/M$ varied, others optimal. This subplot illustrates a complex structure of local minima around the true one which we find analytically.}
-\label{fig:loss}
+	\centering
+	\includegraphics[width=\linewidth]{loss1}
+	\caption{Slices of the loss function \eqref{eq:loss} for the full model and experimental data from the example made around the optimal point. Root-mean-square per-point loss $\sqrt{\mathcal{L}}$ is in MHz. (a) $f_{ge}^{max}$ and $d$ are varied, other parameters optimal. A large valley is located near 9 GHz, and some smaller locally minimal ones are present all around. (b) $g$ and $f_r$ are varied, others optimal. The loss function for these two parameters is well-conditioned near the optimum. (c) Period $\Pi_{f_r} = \Phi_0/M$ and $\Phi_r/M$ varied, others optimal. This subplot illustrates a complex structure of local minima around the true one which we find analytically.}
+	\label{fig:loss}
 \end{figure}
 
- 
+
 Having performed the aforementioned preliminary steps, it is now possible to fit the full model to the extracted points. To do this, we employ brute force optimization combined with the Nelder-Mead simplex downhill algorithm\cite{nelder1965} to polish the brute force result. For both methods, we use a common loss function defined as follows. For the known probe frequency span of the data $\Delta f_p$ (\autoref{fig:anti_exp}(a), whole y-axis) and the set of $N$ extracted points $\{p_i\} = \{(I_i, f_{r,i})\}$, we calculate the loss function as
 \begin{align}
 \mathcal{L} &= \frac{1}{N}\sum_{i=0}^N [f_{r,i} - \mathcal{M}(I_i,\ \Pi, \ I_{ss},\ f_c,\ g,\ f_{ge}^{max},\ d)]^2,\label{eq:loss}\\
@@ -204,7 +204,7 @@ To substantiate the choice of the optimization algorithms, we present in \autore
 \begin{table}
 	\centering
 	\begin{ruledtabular}
-		\begin{tabular}{ccc} 
+		\begin{tabular}{lll} 
 			Parameter & Value range & Steps \\ 
 			\hline
 			$f_c$ & $\langle f_r \rangle_{I} \pm 1$ MHz & 3\\ 
@@ -222,6 +222,28 @@ The brute force algorithm acts on the grid specified in \autoref{tab:grid}. The 
 
 \section{Results}
 
+\begin{table*}
+	\centering
+	\begin{ruledtabular}
+		\renewcommand{\arraystretch}{1.2}
+
+		\begin{tabular}{*{13}{l}} 
+			\multirow{2}{*}{\textbf{Parameter}} & 
+			\multicolumn{4}{l}{\textbf{(a)}} & 
+			\multicolumn{4}{l}{\textbf{(b)}} & \multicolumn{4}{l}{\textbf{(c)}}\\
+			& Brute & N-M & $\sigma$& Correct  & Brute & N-M & $\sigma$ & Correct  & Brute& N-M & $\sigma$ & Correct  \\
+			\hline
+			$f_c$, GHz &6.5004 & 6.5007 &  3$\times 10^{-5}$ & n/a & 6.962 & 6.9628 & & n/a &  6.47 & 6.465& & n/a\\ 
+			$g$, MHz & 24 & 36.1 & 1.5 & n/a & 28 & 43.8 & & n/a & 36 & 86.5&&n/a\\
+			$f_{ge}^{max}$, GHz & 8 &\textbf{8.97} & 0.1 & \textbf{9.04} &9.2& \textbf{9.38}& & \textbf{9.08}& 6.3& \textbf{5.89}&&\textbf{5.9}\\
+			$d$ &0.5& \textbf{0.09}& 0.1& \textbf{0.26} &0.6&\textbf{0.61} &&\textbf{0.6}&0.1& \textbf{0.325} &&\textbf{0.42} \\\hline
+			Loss, kHz & 251 & 24&& &313& 39 & & &2050& 158&&
+		\end{tabular} 
+	\end{ruledtabular}
+	\caption{Optimal parameters (rounded) found for the three cases in \autoref{fig:anti_fit_cases} after the brute and Nelder-Mead optimizations. The correct values for $f_q^{max}$ and $d$ (from TTS) are: (a) 9.04 GHz and 0.26; (b) 9.08 GHz and 0.6; (c) 5.9 GHz and 0.42.}
+	\label{tab:sts_results}
+\end{table*}
+
 In this section, we discuss the performance and accuracy of the two algorithms described in the previous section. Firstly, we test the resonator spectrum recognition, and then the qubit spectrum detection algorithm.
 
 The algorithm was implemented in Python using the \textit{brute} and \textit{minimize} routines of the SciPy\cite{scipy} library. We present here three examples of the detection for all possible qubit-resonator dispositions.  The resulting fits are presented in \autoref{fig:anti_fit_cases} along with the original data and the error plots; we will further reference them as (a), (b) and (c). 
@@ -229,25 +251,6 @@ The algorithm was implemented in Python using the \textit{brute} and \textit{min
 The chosen algorithm order works as expected, as one can see from \autoref{tab:sts_results} comparing the brute estimation and  the final result after Nelder-Mead is performed. 	The significant improvement in the loss value of the polished result compared to the brute estimation is due to the more accurate determination of the cavity frequency $f_c$ which leads as well to major shifts in optimal $g$, $f_{ge}^{max}$ and $d$. However, even these optimal qubit parameters and coupling strength may be inaccurate even on GHz scale. For example, in case (b) for $f_{ge}^{max}$ we see a 300 MHz difference between the optimal and the correct value found with TTS. For (a) and (c), the differences in $f_{ge}^{max}$ are much smaller (about 10-70 MHz) but instead we see significant errors in $d$. Inaccuracy in the qubit parameters is caused by low sensitivity of the resonator frequency to the qubit frequency when they are far away and by 
 
 Finally, The match is almost perfect, and the noise in the residuals is random and thus shows no systematic errors. In \autoref{fig:noise_test} we also present the fitting results for different powers of added noise. The signal-to-noise ratio (SNR) is defined for our data in a similar manner as the SNR in the resonator fitting tests\cite{probst2015}; we take distance $2r$ between two maximally remote points of $S_{21}(f_p, I)$ among any pair on the complex plane (i.e., the diameter of the resonance circle) as the signal amplitude, and the noise of the form $\frac{\xi_1+i\xi_2}{\sqrt 2}$, where $\xi_1,\ \xi_2$ distributed normally with zero mean and variance (amplitude) $\sigma$. The SNR then is defined as $r/\sigma$. As one can see from the graph, the algorithm stays robust even at very low SNRs that are even lower than the low limit SNRs for the \textit{circlefit} stability. This is possible because a fallback strategy of taking the smallest amplitude point as the resonance is applied when \textit{circlefit} fails. Ultimately, the key point of this stress test is to show that the algorithm can be applied in real-life scenarios when the data may be of low quality.
-\begin{table}[b]
-	\centering
-	\begin{ruledtabular}
-		\begin{tabular}{c|cc|cc|cc} 
-			\multirow{2}{*}{Parameter} & 
-			\multicolumn{2}{c}{(a)} & 
-			\multicolumn{2}{c}{(b)} & \multicolumn{2}{c}{(c)}\\
-			& Brute & N-M & Brute & N-M & Brute& N-M\\
-			\hline
-			$f_c$, GHz &6.5004 & 6.5007 & 6.962 & 6.9628 &  6.47 & 6.465\\ 
-			$g$, MHz & 24 & 36.1 & 28 & 43.8 & 36 & 86.5\\
-			$f_{ge}^{max}$, GHz & 8 &8.97 &9.2& 9.38& 6.3& 5.89\\
-			$d$ &0.5&0.09&0.6&0.61&0.1& 0.325 \\\hline
-			Loss, kHz & 251 & 24 &313& 39 &2050& 158
-		\end{tabular} 
-	\end{ruledtabular}
-	\caption{Optimal parameters (rounded) found for the three cases in \autoref{fig:anti_fit_cases} after the brute and Nelder-Mead optimizations. The correct values for $f_q^{max}$ and $d$ (from TTS) are: (a) 9.04 GHz and 0.26; (b) 9.08 GHz and 0.6; (c) 5.9 GHz and 0.42.}
-	\label{tab:sts_results}
-\end{table}
 
 \begin{figure*}
 	\centering
