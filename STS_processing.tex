@@ -183,7 +183,7 @@ To distinguish between these two cases when the noise is not too large, one may 
 \begin{figure}
 	\centering
 	\includegraphics[width=\linewidth]{loss1}
-	\caption{Slices of the loss function \eqref{eq:loss} for the full model and experimental data from the example made around the optimal point. Root-mean-square per-point loss $\sqrt{\mathcal{L}}$ is in MHz. (a) $f_{ge}^{max}$ and $d$ are varied, other parameters optimal. A large valley is located near 9 GHz, and some smaller locally minimal ones are present all around. (b) $g$ and $f_r$ are varied, others optimal. The loss function for these two parameters is well-conditioned near the optimum. (c) Period $\Pi_{f_r} = \Phi_0/M$ and $\Phi_r/M$ varied, others optimal. This subplot illustrates a complex structure of local minima around the true one which we find analytically.}
+	\caption{Slices of the loss function \eqref{eq:loss} for the full model and experimental data from the example made around the optimal point. Root-mean-square per-point loss $\sqrt{\mathcal{L}}$ is in MHz. (a) $f_{ge}^{max}$ and $d$ are varied, other parameters optimal. A large valley is located near 9 GHz, and some smaller locally minimal ones are present all around. (b) $g$ and $f_r$ are varied, others optimal. The loss function for these two parameters is well-conditioned near the optimum. (c) $\Pi$ and $I_{ss}$ varied, others optimal. This subplot illustrates a complex structure of local minima around the true one which we find analytically.}
 	\label{fig:loss}
 \end{figure}
 
@@ -231,16 +231,16 @@ The brute force algorithm acts on the grid specified in \autoref{tab:grid}. The 
 			\multirow{2}{*}{\textbf{Parameter}} & 
 			\multicolumn{4}{l}{\textbf{(a)}} & 
 			\multicolumn{4}{l}{\textbf{(b)}} & \multicolumn{4}{l}{\textbf{(c)}}\\
-			& Brute & N-M & $\sigma$& Correct  & Brute & N-M & $\sigma$ & Correct  & Brute& N-M & $\sigma$ & Correct  \\
+			& Brute & N-M & $\mathbb{H}^{-1}$ & Correct  & Brute & N-M & $\mathbb{H}^{-1}$ & Correct  & Brute& N-M & $\mathbb{H}^{-1}$ & Correct  \\
 			\hline
-			$f_c$, GHz &6.5004 & 6.5007 &  3$\times 10^{-5}$ & n/a & 6.962 & 6.9628 & & n/a &  6.47 & 6.465& & n/a\\ 
-			$g$, MHz & 24 & 36.1 & 1.5 & n/a & 28 & 43.8 & & n/a & 36 & 86.5&&n/a\\
-			$f_{ge}^{max}$, GHz & 8 &\textbf{8.97} & 0.1 & \textbf{9.04} &9.2& \textbf{9.38}& & \textbf{9.08}& 6.3& \textbf{5.89}&&\textbf{5.9}\\
-			$d$ &0.5& \textbf{0.09}& 0.1& \textbf{0.26} &0.6&\textbf{0.61} &&\textbf{0.6}&0.1& \textbf{0.325} &&\textbf{0.42} \\\hline
-			Loss, kHz & 251 & 24&& &313& 39 & & &2050& 158&&
+			$f_c$, GHz &6.5003 & 6.5007 &  3$\times 10^{-5}$ & n/a & 6.962 & 6.9631 & 1.2 $\times 10^{-3}$  & n/a &  6.47 & 6.465& 1.4$\times 10^{-3}$ & n/a\\ 
+			$g$, MHz & 24 & 35.8 & 1.13 & n/a & 36 & 64.9 & 111 & n/a & 36 & 86.1& 7.3 &n/a\\
+			$f_{ge}^{max}$, GHz & 8 &\textbf{8.97} & 0.09 & \textbf{9.04} &10.3& \textbf{11.3}& 9.66 & \textbf{9.08}& 6.3& \textbf{5.89}&0.07&\textbf{5.9}\\
+			$d$ &0.5& \textbf{0.09}& 0.08& \textbf{0.26} &0.5&\textbf{0.49} &0.52&\textbf{0.6}&0.1& \textbf{0.25} & 0.4 &\textbf{0.42} \\\hline
+			Loss, kHz & 251 & 20 && &338& 51 & & &2038& 149&&
 		\end{tabular} 
 	\end{ruledtabular}
-	\caption{Optimal parameters (rounded) found for the three cases in \autoref{fig:anti_fit_cases} after the brute and Nelder-Mead optimizations. The correct values for $f_q^{max}$ and $d$ (from TTS) are: (a) 9.04 GHz and 0.26; (b) 9.08 GHz and 0.6; (c) 5.9 GHz and 0.42.}
+	\caption{Analysis of optimal parameters found for the three cases in \autoref{fig:anti_fit_cases} after the brute and Nelder-Mead optimizations. $\mathbb{H}^{-1}$ stands for the standard deviations found from the diagonal of the covariance matrix which was calculated using the Hessian $\mathbb{H}$ of the loss function at the optimum.}
 	\label{tab:sts_results}
 \end{table*}
 
@@ -250,7 +250,7 @@ The algorithm was implemented in Python using the \textit{brute} and \textit{min
 
 The chosen algorithm order works as expected, as one can see from \autoref{tab:sts_results} comparing the brute estimation and  the final result after Nelder-Mead is performed. 	The significant improvement in the loss value of the polished result compared to the brute estimation is due to the more accurate determination of the cavity frequency $f_c$ which leads as well to major shifts in optimal $g$, $f_{ge}^{max}$ and $d$. However, even these optimal qubit parameters and coupling strength may be inaccurate even on GHz scale. For example, in case (b) for $f_{ge}^{max}$ we see a 300 MHz difference between the optimal and the correct value found with TTS. For (a) and (c), the differences in $f_{ge}^{max}$ are much smaller (about 10-70 MHz) but instead we see significant errors in $d$. Inaccuracy in the qubit parameters is caused by low sensitivity of the resonator frequency to the qubit frequency when they are far away and by 
 
-Finally, The match is almost perfect, and the noise in the residuals is random and thus shows no systematic errors. In \autoref{fig:noise_test} we also present the fitting results for different powers of added noise. The signal-to-noise ratio (SNR) is defined for our data in a similar manner as the SNR in the resonator fitting tests\cite{probst2015}; we take distance $2r$ between two maximally remote points of $S_{21}(f_p, I)$ among any pair on the complex plane (i.e., the diameter of the resonance circle) as the signal amplitude, and the noise of the form $\frac{\xi_1+i\xi_2}{\sqrt 2}$, where $\xi_1,\ \xi_2$ distributed normally with zero mean and variance (amplitude) $\sigma$. The SNR then is defined as $r/\sigma$. As one can see from the graph, the algorithm stays robust even at very low SNRs that are even lower than the low limit SNRs for the \textit{circlefit} stability. This is possible because a fallback strategy of taking the smallest amplitude point as the resonance is applied when \textit{circlefit} fails. Ultimately, the key point of this stress test is to show that the algorithm can be applied in real-life scenarios when the data may be of low quality.
+Finally, The match is almost perfect, and the noise in the residuals is random and thus shows no systematic errors. In \autoref{fig:noise_test} we also present the fitting results for different powers of added noise. The signal-to-noise ratio (SNR) is defined for our data in a similar manner as the SNR in the resonator fitting tests\cite{probst2015}; since the data for a resonator lie on a circle in the complex plane, we take its radius $r$ as the signal amplitude. Then, if the noise is of the form $\frac{\xi_1+i\xi_2}{\sqrt 2}$, where $\xi_1,\ \xi_2$ distributed normally with zero mean and variance $\sigma$, the SNR is defined as $r/\sigma$. As one can see from the graph, the algorithm stays robust even at very low SNRs that are even lower than the low limit SNRs for the \textit{circlefit} stability. This is possible because a fallback strategy of taking the smallest amplitude point as the resonance is applied when \textit{circlefit} fails. Ultimately, the key point of this stress test is to show that the algorithm can be applied in real-life scenarios when the data may be of low quality.
 
 \begin{figure*}
 	\centering
@@ -262,7 +262,7 @@ Finally, The match is almost perfect, and the noise in the residuals is random a
 \begin{figure*}
 	\centering
 	\includegraphics[width=\linewidth]{noise_test}
-	\caption{Behaviour of the algorithm on the real data from \autoref{fig:anti_fit_cases} with added gaussian noise of varying power (i.e., with artificially reduced SNR). The clouds show standard deviations of optimal parameters after 50 tries, solid lines show mean values. (a) Detecting avoided crossings; the data used are from \autoref{fig:anti_fit_cases}(a). The algorithm is accurate above SNR=3 but is	 still robust at detecting avoided crossings down to SNR=2 but with reduced accuracy in $f_{ge}^{max}$, $g$ and $d$. (b) Detection for the case of smooth dependence of the resonator frequency on current; the data used are from \autoref{fig:anti_fit_cases}(c). Due to the problems with the resonator fitting, the stability is reached only above SNR=5. Correct qubit parameters $f_{q}^{max}$=5.91 GHz and $d=0.42$ (from TTS); $f_{q}^{max}$ from the fit in the stable region is 5.89 GHz. However, $d$ still can not be determined accurately on the data with noise;it is estimated to be $0.35$ on the original data.}
+	\caption{Behaviour of the algorithm on the real data from \autoref{fig:anti_fit_cases} with added gaussian noise of varying power (i.e., with artificially reduced SNR). The clouds show the 25th and 75th percentiles of the optimal parameter samples after 50 tries, solid lines show median values. (a) Detecting avoided crossings; the data used are from \autoref{fig:anti_fit_cases}(a). The algorithm is accurate above SNR=3 but is	 still robust at detecting avoided crossings down to SNR=2 but with reduced accuracy in $f_{ge}^{max}$, $g$ and $d$. (b) Detection for the case of smooth dependence of the resonator frequency on current; the data used are from \autoref{fig:anti_fit_cases}(c). Due to the problems with the resonator fitting, the stability is reached only above SNR=5. Correct qubit parameters $f_{q}^{max}$=5.91 GHz and $d=0.42$ (from TTS); $f_{q}^{max}$ from the fit in the stable region is 5.89 GHz. However, $d$ still can not be determined accurately on the data with noise;it is estimated to be $0.35$ on the original data.}
 	\label{fig:noise_test}
 \end{figure*}
 The fitting example above runs for 3.2 seconds on a 5-year old Intel Core i5-3337U CPU, from which 2.7 seconds are for the brute and 0.4 of a second is for the Nelder-Mead minimization. On a contemporary Intel Core i7-7700 CPU, it takes about one second to run the whole procedure. The time costs mostly come from the square root calculation necessary for Eqs. \eqref{eq:tr_levels} and \eqref{eq:branches2} and because that the brute routine is not parallelized. However, this is still fast, firstly, because recording a resonator spectrum such as one in the example takes around 20 seconds, and, secondly, it is much faster than a human would do. 
@@ -271,7 +271,7 @@ The fitting example above runs for 3.2 seconds on a 5-year old Intel Core i5-333
 \begin{figure}
 	\centering
 	\includegraphics[width=\linewidth]{alternative_fits}
-	\caption{(a) Two alternative fits (orange and green lines) for the same data (blue dots). The corresponding parameters $f_c,\ g,\ f_{ge}^{max}, d$ for the two alternative fits are in shown the legend. (b) Residuals for the two fits, in orange (qubit below) and green (qubit above). RMS errors are 14 kHz and 11 kHz, respectively.}
+	\caption{(a) Two alternative fits (orange and green lines) for the same data (blue dots). The corresponding parameters $f_c,\ g,\ f_{ge}^{max}, d$ for the two alternative fits are in shown the legend along with the loss values. (b) Residuals for the two fits, in orange (qubit below) and green (qubit above the resonator).}
 	\label{fig:alternative-fits}
 \end{figure}
 
