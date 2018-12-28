@@ -41691,13 +41691,13 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.6451173"
-     inkscape:cx="162.72397"
-     inkscape:cy="43.28827"
+     inkscape:zoom="1.3225587"
+     inkscape:cx="214.52991"
+     inkscape:cy="38.090768"
      inkscape:document-units="mm"
      inkscape:current-layer="surface8614301"
      showgrid="false"
-     showguides="false"
+     showguides="true"
      inkscape:guide-bbox="true"
      inkscape:snap-bbox="false"
      inkscape:bbox-nodes="true"
@@ -41729,6 +41729,11 @@
        orientation="1,0"
        id="guide54427"
        inkscape:locked="false" />
+    <sodipodi:guide
+       position="39.410665,28.982842"
+       orientation="0,1"
+       id="guide45010"
+       inkscape:locked="false" />
   </sodipodi:namedview>
   <metadata
      id="metadata36892">
@@ -41738,7 +41743,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -42047,17 +42052,6 @@
            height="100%" />
       </g>
       <g
-         id="g104919"
-         style="fill:#000000;fill-opacity:1">
-        <use
-           id="use104917"
-           y="35.702103"
-           x="96.714172"
-           xlink:href="#glyph1-1-7"
-           width="100%"
-           height="100%" />
-      </g>
-      <g
          id="g104923"
          style="fill:#000000;fill-opacity:1">
         <use
@@ -42086,18 +42080,11 @@
          inkscape:connector-curvature="0" />
       <g
          id="g104933"
-         style="fill:#000000;fill-opacity:1">
-        <use
-           id="use104931"
-           y="79.411911"
-           x="78.750061"
-           xlink:href="#glyph3-1-7"
-           width="100%"
-           height="100%" />
-      </g>
+         style="fill:#000000;fill-opacity:1" />
       <g
          id="g104937"
-         style="fill:#000000;fill-opacity:1">
+         style="fill:#000000;fill-opacity:1"
+         transform="translate(-7.0296237)">
         <use
            id="use104935"
            y="79.411911"
@@ -42108,7 +42095,8 @@
       </g>
       <g
          id="g104945"
-         style="fill:#000000;fill-opacity:1">
+         style="fill:#000000;fill-opacity:1"
+         transform="translate(-7.0296237)">
         <use
            id="use104939"
            y="81.411911"
@@ -42133,7 +42121,8 @@
       </g>
       <g
          id="g104951"
-         style="fill:#000000;fill-opacity:1">
+         style="fill:#000000;fill-opacity:1"
+         transform="translate(-3.276338)">
         <use
            id="use104947"
            y="79.411911"
@@ -42150,19 +42139,9 @@
            height="100%" />
       </g>
       <g
-         id="g104955"
-         style="fill:#000000;fill-opacity:1">
-        <use
-           id="use104953"
-           y="79.411911"
-           x="106.8674"
-           xlink:href="#glyph3-1-7"
-           width="100%"
-           height="100%" />
-      </g>
-      <g
          id="g104963"
-         style="fill:#000000;fill-opacity:1">
+         style="fill:#000000;fill-opacity:1"
+         transform="translate(-4.914507)">
         <use
            id="use104957"
            y="79.411911"
@@ -42176,7 +42155,8 @@
            x="116.6474"
            xlink:href="#glyph4-2-13"
            width="100%"
-           height="100%" />
+           height="100%"
+           transform="translate(3.5610791)" />
         <use
            id="use104961"
            y="79.411911"
@@ -43122,6 +43102,75 @@
                style="font-size:13.33333302px;stroke-width:1.12925422" /></flowRegion><flowPara
              id="flowPara10731-1"
              style="stroke-width:1.12925422">1D curves</flowPara></flowRoot>      </g>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:32.76338196px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.81908453"
+         x="73.441093"
+         y="79.422241"
+         id="text44966"><tspan
+           sodipodi:role="line"
+           id="tspan44964"
+           x="73.441093"
+           y="79.422241"
+           style="font-size:10.92112637px;stroke-width:0.81908453">{</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:32.76338196px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.81908453"
+         x="-99.727699"
+         y="79.506439"
+         id="text44966-3"
+         transform="scale(-1,1)"><tspan
+           sodipodi:role="line"
+           id="tspan44964-6"
+           x="-99.727699"
+           y="79.506439"
+           style="font-size:10.92112541px;stroke-width:0.81908453">{</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:32.76338196px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.81908453"
+         x="102.39763"
+         y="79.425636"
+         id="text44966-7"><tspan
+           sodipodi:role="line"
+           id="tspan44964-5"
+           x="102.39763"
+           y="79.425636"
+           style="font-size:10.92112541px;stroke-width:0.81908453">{</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:32.76338196px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.81908453"
+         x="-118.001"
+         y="79.432426"
+         id="text44966-3-3"
+         transform="scale(-1,1)"><tspan
+           sodipodi:role="line"
+           id="tspan44964-6-5"
+           x="-118.001"
+           y="79.432426"
+           style="font-size:10.92112541px;stroke-width:0.81908453">{</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:32.76338196px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.81908453"
+         x="98.098633"
+         y="35.703941"
+         id="text44966-7-6"><tspan
+           sodipodi:role="line"
+           id="tspan44964-5-2"
+           x="98.098633"
+           y="35.703941"
+           style="font-size:10.92112541px;stroke-width:0.81908453">{</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:32.76338196px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.81908453"
+         x="-116.97835"
+         y="35.710732"
+         id="text44966-3-3-9"
+         transform="scale(-1,1)"><tspan
+           sodipodi:role="line"
+           id="tspan44964-6-5-1"
+           x="-116.97835"
+           y="35.710732"
+           style="font-size:10.92112541px;stroke-width:0.81908453">{</tspan></text>
     </g>
     <flowRoot
        xml:space="preserve"
