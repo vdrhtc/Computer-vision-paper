@@ -49,6 +49,7 @@
 \usepackage{multirow}
 \usepackage{makecell}
 \usepackage[inline, nomargin]{fixme}
+\usepackage{physics}
 \graphicspath{{Pictures/}}
 \begin{document}
 
@@ -79,8 +80,7 @@ Karlsruhe Institute of Technology, Karlsruhe, Germany
              %  but any date may be explicitly specified
 
 \begin{abstract}
-\fxfatal{Is abstract supposed to be re-written completely?}	
-To build a full-scale quantum processor it is necessary to automate as many steps as possible on the physical, hardware level. Circuit quantum electrodynamics (cQED) is a contemporary architecture for dispersive readout and Purcell protection of superconducting qubits of various types, and thus it is necessary to develop software that is able to perform every kind of automatic calibration of such systems from scratch without any human participation. An important step towards this goal is to build a noise-insensitive and accurate computer vision tool to process three-dimensional spectroscopic data. In this work, we present and describe two scalable algorithms that are able to extract the Hamiltonian parameters of the cQED systems from spectroscopic data. 
+Physical systems for quantum computation require careful calibration of the control parameters based on their physical parameters by performing a chain of experiments that gather more and more precise information about the given device. It follows that there is the need for automatic data acquisition and interpretation. In this work, we have developed a recognition tool that allows automatic analysis of single-tone spectroscopy (STS) results for a single qubit-resonator cell in the cQED architecture. Using several analytic approaches and maximum likelihood estimation, our algorithm is able to predict all of the physical parameters using only the STS data. It is fast and robust to noise, and its Python implementation is ready to be used with transmon qubits coupled to notch-port resonators.
 \end{abstract}
 
 \maketitle
@@ -314,7 +314,7 @@ Basing on the complexity of calculating the value of the loss functions, the fre
 
 In summary, we have developed and implemented a method for automatic processing of single-tone spectroscopic data that uses maximum likelihood estimation to extract the physical parameters of cQED systems from a measurement result. We have shown that it is possible to estimate all of the system parameters by observing only the behaviour of the resonance peak for any type of the qubit-resonator disposition. Our method is robust to strong noise down to SNR=3 and is fast enough to be used in practice. Despite the fact that the accuracy of the algorithm does not allow to start gate calibrations right after the single-tone spectroscopy step, it is enough to perform two-tone spectroscopy with significantly reduced scan ranges to reduce time costs. Additionally, basing on the fit quality it is possible to distinguish between functional and defective samples.
 
-The software implementation of the algorithm in Python may be found on GitHub\footnote{\url{https://github.com/vdrhtc/Measurement-automation/blob/master/lib2/fulaut/AnticrossingOracle.py}}. For convenience, the code as well accepts data as a Python dictionary with corresponding keys. Currently, only transmon qubits are supported; however, we are ready to implement another type of qubit if needed.
+The software implementation of the algorithm in Python may be found on GitHub\footnote{\url{https://github.com/vdrhtc/Measurement-automation/blob/master/lib2/fulaut/AnticrossingOracle.py}}. The code as well accepts data as a Python dictionary with corresponding keys. Currently, only transmon qubits are supported; however, we are ready to implement another type of qubit if needed.
 
 \begin{figure}[b]
 	\centering
@@ -338,66 +338,12 @@ Finally, in the future we are planning to use the proposed algorithm along with 
 
 \section{Transmon Hamiltonian}\label{sec:transmon}
 
-The simplest version of this qubit consists of a Josephson junction shunted with a large capacitor. Flux tunability of the frequency is attained by replacing a single Josephson junction with a SQUID) as in \autoref{fig:trans}(a) and applying external magnetic flux $\Phi_e$ to its loop. This configuration can be equivalently represented with a shunted junction of tunable energy, \autoref{fig:trans}(b). The Hamiltonian for such equivalent circuit is as follows: 
-\begin{equation}
-\hat{H}_{tr} = 4E_C \hat n^2 - E_J(\Phi_e) \cos \hat\varphi,
-\label{eq:tr_ham}
-\end{equation}
-where $E_{J1,2}$ are the Josephson energies , $E_C = e^2/2C_{\Sigma}$, $C_{\Sigma} = C_s + C_1 +C_2$, is the charging energy, $\hat n$ and $\hat \varphi$ are the operators for the Cooper pair number and the phase of the qubit island. For the equivalent Josephson energy $E_{J}$ one obtains
-\begin{equation}
-E_{J}(\Phi_e) = E_{J\Sigma}\cos\left(\pi \Phi_e/\Phi_0\right) \sqrt{1+d^2 \tan^2 \left(\pi \Phi_e/\Phi_0\right)},
-\label{eq:EJ_Phie}
-\end{equation}  
-where $E_{J\Sigma} = E_{J1}+E_{J2}$, $d = \frac{E_{J1}-E_{J2}}{E_{J1}+E_{J2}}$ is the asymmetry of the SQUID. As one can notice, the dependence is periodic in $\Phi_e$.
-\begin{figure}
+\begin{figure}[b]
 	\centering
 	\includegraphics[width=\linewidth]{transmon}
 	\caption{(a) A tunable transmon circuit with an asymmetric SQUID, $E_{J1} \neq E_{J2}$. (b) Equivalent transmon with tunable energy $E_{J}(\Phi_e)$ and unified capacitance $C_{\Sigma}$. The qubit island containing its single degree of freedom is in blue.}
 	\label{fig:trans}
 \end{figure}
-\begin{table}
-	\centering
-	\begin{tabular}{l|c}
-		Level & Energy\\
-		\hline
-		$g\ (E_0)$ & 0\\
-		$e\ (E_1)$ & $\sqrt{8E_J E_C} - E_C$\\
-		$f\ (E_2)$ & $2\sqrt{8E_J E_C} - 3 E_C$\\
-		$d\ (E_3)$ & $3\sqrt{8E_J E_C} - 6 E_C$\\
-		$E_4$ & $4\sqrt{8E_J E_C} - 10 E_C$\\
-		\hline
-	\end{tabular}\quad
-	\begin{tabular}{l|c}
-		Transition & Frequency\\
-		\hline
-		$ge$ & $\omega_{ge}$ \\
-		$gf/2$ & $\omega_{ge} - 0.5 E_C$\\
-		$ef$, $gd/3$& $\omega_{ge}-E_C$\\
-		$ed/2$ & $\omega_{ge} - 1.5 E_C$\\
-		$fd$, $e E_4/3$ & $\omega_{ge}-2 E_C$\\
-		\hline
-	\end{tabular}
-	\caption{Energies and some transition (single and multi-photon) frequencies for the first 5 levels of the transmon calculated with \eqref{eq:tr_levels}.}
-	\label{tab:tr_transitions}
-\end{table}
-It is also possible to derive analytical expressions for the energy levels and transition frequencies for this type of qubits. The energy of the $m$\textsuperscript{th} level is \cite{koch2007}
-\begin{equation}
-E_m = m \sqrt{8E_J(\Phi_e) E_C} -\frac{E_C}{12}(6m^2+6m),
-\label{eq:tr_levels}
-\end{equation}
-and some of the transition frequencies are presented in \autoref{tab:tr_transitions}. The qubit frequency  may be approximated as 
-\begin{equation}
-\begin{aligned}
-f_{ge}(\Phi_e) &\approx \sqrt{8 E_J (\Phi_e) E_C} \\
-&= f_{ge}^{max} \sqrt{\cos\left(\pi \Phi_e/\Phi_0\right) \sqrt{1+d^2 \tan^2 \left(\pi \Phi_e/\Phi_0\right)}},
-\end{aligned}
-\end{equation}
-where $f_{ge}^{max} = \sqrt{8 E_J(0) E_C}$. This simplifies the expression for the frequency since now it depends on two parameters instead of three.
-
-One final note is that in real-life applications is not possible to know directly the flux $\Phi_e$ that is threaded through the SQUID. The experimenter usually knows only the current $I$ (or voltage) which he applies to some coil that is connected inductively to the SQUID. Then $\Phi_e = M I + \Phi_r$, where $M$ stands for the mutual inductance of the coil and the SQUID, and $\Phi_r$ is some residual flux inherent to the sample.
-
-\section{Circuit QED}\label{sec:cqed}
-
 
 \begin{figure*}
 	\centering
@@ -406,27 +352,54 @@ One final note is that in real-life applications is not possible to know directl
 	\label{fig:anti_theor}
 \end{figure*}
 
-The readout of the superconducting qubits is now predominantly done using an ancilla system which is usually implemented as a superconducting microwave resonator which acts as an electromagnetic cavity in the standard cavity QED. Truncating the qubit to two levels, one may obtain the following Hamiltonian for the compound cavity-qubit system (in RWA):
+The simplest version of this qubit consists of a Josephson junction shunted with a large capacitor. Flux tunability of the frequency is attained by replacing a single Josephson junction with a SQUID as in \autoref{fig:trans}(a) and applying external magnetic flux $\Phi_e$ to its loop. This scheme can be equivalently represented by a capacitively shunted junction of tunable Josephson energy, \autoref{fig:trans}(b). The Hamiltonian for such system is as follows: 
 \begin{equation}
-\hat H/h = \frac{f_q}{2} \hat \sigma_z + f_c \hat a^\dagger \hat a + g(\hat \sigma^- \hat a^\dagger + \hat \sigma^+ \hat a),
+\hat{H}_{tr} = 4E_C \hat n^2 - E_J(\Phi_e) \cos \hat\varphi,
+\label{eq:tr_ham}
 \end{equation}
-where $f_q$ is the qubit frequency, $f_c$ is the cavity frequency and $g$ is the coupling strength. As long as the RWA is done, this Hamiltonian may be diagonalized analytically\cite{blais2004}:
+where $E_C = e^2/2C_{\Sigma}$, $C_{\Sigma} = C_s + C_1 +C_2$, is the charging energy, $\hat n$ and $\hat \varphi$ are the operators for the Cooper pair number and the phase of the qubit island. For the equivalent Josephson energy $E_{J}(\Phi_e)$ one obtains
+\begin{equation}
+E_{J}(\Phi_e) = E_{J\Sigma}\cos\left(\pi \Phi_e/\Phi_0\right) \sqrt{1+d^2 \tan^2 \left(\pi \Phi_e/\Phi_0\right)},
+\label{eq:EJ_Phie}
+\end{equation}  
+where $E_{J\Sigma} = E_{J1}+E_{J2}$ ($E_{J1},\ E_{J2}$ are the single junction energies), $d = \frac{E_{J1}-E_{J2}}{E_{J1}+E_{J2}}$ is the asymmetry of the SQUID. As one can notice, the dependence is periodic in $\Phi_e$.
+
+It is also possible to derive analytical expressions for the energy levels and transition frequencies for this type of qubits. The energy of the $m$\textsuperscript{th} level is (in the limit of $E_J\gg E_C$) \cite{koch2007}
+\begin{equation}
+E_m = m \sqrt{8E_J(\Phi_e) E_C} -\frac{E_C}{12}(6m^2+6m).
+\label{eq:tr_levels}
+\end{equation}
+From this equation, the qubit transition frequency ($ \ket{0}\rightarrow \ket{1}$, or $ \ket{g}\rightarrow \ket{e}$, or the $ge$ transition) may be approximated as 
+\begin{equation}
+\begin{aligned}
+f_{ge}(\Phi_e) &\approx \sqrt{8 E_J (\Phi_e) E_C} \\
+&= f_{ge}^{max} \sqrt{\cos\left(\pi \Phi_e/\Phi_0\right) \sqrt{1+d^2 \tan^2 \left(\pi \Phi_e/\Phi_0\right)}},
+\end{aligned}
+\label{eq:tr_model}
+\end{equation}
+where $f_{ge}^{max} = \sqrt{8 E_J(0) E_C}-E_C$ is the maximal possible frequency. The approximation here is $E_C \approx E_C/\sqrt{\cos\left(\dots\right) \sqrt{1+d^2 \tan^2 \left(\dots\right)}}$  which gives significant errors only when $E_J\approx E_C$ (when $d$ is small and $\Phi_e\approx\pi/2$) and when the expression \eqref{eq:tr_levels} which itself is no longer valid. On the contrary, this approximation simplifies the model since now it depends just on two parameters ($f_{ge}^{max}, d$) instead of three. Therefore, we choose \eqref{eq:tr_model} as the theoretical curve in fitting.
+
+One final note is that in the real-life applications is not possible to know directly the flux $\Phi_e$ that is threaded through the SQUID. The experimenter usually knows only the current $I$ (or voltage) which he applies to some coil that is connected inductively to the SQUID. Then $\Phi_e = M I + \Phi_r$, where $M$ stands for the mutual inductance of the coil and the SQUID, and $\Phi_r$ is some residual flux inherent to the sample. Therefore, in the main text we only the current $I$, the period in current $\Pi = \Phi_0/M$ and the sweet spot current $I_{ss} = -\Phi_r/M$.
+
+\section{Circuit QED}\label{sec:cqed}
+
+The readout of the superconducting qubits is now predominantly done using an ancilla system which is usually implemented as a superconducting microwave resonator which acts as an electromagnetic cavity in the standard cavity quantum electrodynamics (QED). Truncating the qubit to two levels ($ge$ transition), one may obtain the following Hamiltonian for the compound cavity-qubit system (in RWA):
+\begin{equation}
+\hat H/h = \frac{f_{ge}}{2} \hat \sigma_z + f_c \hat a^\dagger \hat a + g(\hat \sigma^- \hat a^\dagger + \hat \sigma^+ \hat a),
+\end{equation}
+where $f_{ge}$ is the qubit frequency, $f_c$ is the cavity frequency and $g$ is the coupling strength. As long as the RWA is done, this Hamiltonian may be diagonalized analytically\cite{blais2004}:
 \begin{align}
-E_{g, 0}/h &= \frac{f_c - f_q}{2},\label{eq:branches1}
+E_{g, 0}/h &= \frac{f_c - f_{ge}}{2},\label{eq:branches1}
 \\
-E_{\pm, n}/h &= (n+1)f_c \pm \frac{1}{2}\sqrt{4g^2(n+1)+(f_q-f_c)^2}.
+E_{\pm, n}/h &= (n+1)f_c \pm \frac{1}{2}\sqrt{4g^2(n+1)+(f_{ge}-f_c)^2}.
 \label{eq:branches2}
 \end{align}
 
-This is very convenient for our purposes. By substituting the dependence of the qubit frequency $f_q \equiv f_{ge}(\Phi_e)$ into these equations, we can get straightforwardly the full system spectrum in dependence on the magnetic flux. In \autoref{fig:anti_theor} we have used the equations \eqref{eq:tr_levels}, \eqref{eq:branches1} and \eqref{eq:branches2} to model a tunable transmon interacting with a cavity for various $\Phi_e$ and various $f_{ge}^{max},\ d$. In the lower row of the figure, one can see that it is possible to extract the dependence of the \textit{cavity} frequency $f_c$ on $\Phi_e$; for example, the well-known avoided crossing pattern can be directly observed in \autoref{fig:anti_theor}(a), and the other two possible behaviours for the qubit entirely above or below the resonator in \autoref{fig:anti_theor}(b),(c). To shorten the notation, in the following we will define the corresponding branch frequencies of \eqref{eq:branches2} as $f_{\pm} = ( E_{\pm,0}-E_{g,0})/2\pi$.
-
-In \autoref{fig:anti_theor}(a) it is also possible to see the entire spectrum of a transmon $ge$ transition predicted by equations \eqref{eq:EJ_Phie}, \eqref{eq:tr_levels}. It has a cosine-like periodic shape with a period of one flux quantum $\Phi_0$. Consequently, it has two extrema, the upper and the lower which are called ``sweet spots'' due to the first-order insensitivity to $\Phi_e$, and thus to possible flux noise. In the following, by saying sweet spot we will assume the upper one whose frequency is $f_{ge}(\Phi_e = 0) \equiv f^{max}_{ge}$ .
-
-We will use the model \eqref{eq:branches1}, \eqref{eq:branches2} to fit the resonator frequency that we can find in an experiment. The only conceptual problem for the fitting that is left now is that the function we want to use as a model is not single-valued. Indeed, in \autoref{fig:anti_theor}(a, top) for each value of magnetic flux we always find two frequency points corresponding to the qubit and to the resonator, respectively. However, in practice only a narrow scan around the resonator frequency such as in \autoref{fig:anti_theor}(a, bottom) is required, and thus no ambiguity occurs. 
+This is very convenient for our purposes. By substituting the dependence of the qubit frequency $f_{ge} \equiv f_{ge}(\Phi_e)$ into these equations, we can get straightforwardly the full system spectrum in dependence on the magnetic flux. In \autoref{fig:anti_theor} we have used the equations \eqref{eq:tr_model}, \eqref{eq:branches1} and \eqref{eq:branches2} to model a tunable transmon interacting with a cavity for various $\Phi_e$ and various $f_{ge}^{max},\ d$. In the lower row of the figure, one can see that it is possible to extract the dependence of the \textit{modified} cavity frequency $f_c^\prime$ on $\Phi_e$ (in the main text, we call it $f_r$ as the experimentally observed resonator frequency); for example, the avoided crossings pattern can be directly observed in \autoref{fig:anti_theor}(a), and the other two possible behaviours for the qubit entirely above or below the resonator in \autoref{fig:anti_theor}(b),(c). To shorten the notation, in the following we will define the corresponding branch frequencies of \eqref{eq:branches2} as $f_{\pm} = ( E_{\pm,0}-E_{g,0})/2\pi$.
 
 \section{Maximum likelihood and fit error estimation}\label{sec:ML}
 	
-For a vector $\mathbf{w}$ of parameters, it is possible to calculate the likelihood $ \mathcal{P}(\mathbf{p}|\mathbf{w}) $ to observe the given data points $\mathbf{p} = \{I_i, f_{r,i}\}_{i=0}^N$. If the data points are normally distributed $\mathbb{N}_{\mu_i, \sigma}$ around the model ($\mu_i = \mathcal{M}(I_i, \mathbf{w})$) and are uncorrelated, it is the product of the deviation probabilities of the individual data points:
+For a vector $\mathbf{w}$ of parameters, it is easy to calculate the likelihood $ \mathcal{P}(\mathbf{p}|\mathbf{w}) $ to observe the given data points $\mathbf{p} = \{I_i, f_{r,i}\}_{i=0}^N$ if the data points are normally distributed $\mathbb{N}_{\mu_i, \sigma}$ around the model ($\mu_i = \mathcal{M}(I_i, \mathbf{w})$) and are uncorrelated. The sought value is the product of the deviation probabilities of the individual data points:
 \begin{equation}
 \mathcal{P}(\mathbf{p}|\mathbf{w}) = \prod_{i=0}^{N} \frac{1}{\sqrt{2\pi}\sigma} \exp[ -(f_{r,i} - \mu_i)^2 / 2 \sigma^2]\label{eq:MLE} 
 \end{equation}
@@ -435,9 +408,9 @@ The maximum likelihood method consists of finding the parameters $\mathbf{w}$ su
 - \ln \mathcal{P}(\mathbf{p}|\mathbf{w}) = \sum_{i=0}^N (f_{r,i} - \mu_i)^2 / 2 \sigma^2 + N \ln\sqrt{2\pi}\sigma.
 \label{eq:logL}
 \end{equation}
-Minimizing this function is equivalent to maximizing the likelihood since the logarithm is a monotonic function. Since the second term does not depend on $\mathbf{w}$, the task is reduced to minimizing the sum of squares; this argument dictates the chosen form of the loss function \eqref{eq:loss}. We denote the optimal parameter vector as $\mathbf{w}^*$.
+Minimizing this function is equivalent to maximizing the likelihood since the logarithm is a monotonic function. As the second term does not depend on $\mathbf{w}$, the task is reduced to minimizing the sum of squares; this argument dictates the chosen form of the loss function \eqref{eq:loss}. We denote the optimal parameter vector as $\mathbf{w}^*$.
 
-We then presume that the posterior probability $\mathcal{P}(\mathbf{w}|\mathbf{p})$ is a multivariate Gaussian distribution with respect to the parameters $\mathbf{w}$:
+Next, we want to estimate the errors on the found  $\mathbf{w}^*$. To understand the meaning of these errors, we presume that there is a posterior probability distribution on $\mathbf{w}$ given the data points $\mathbf{p}$. We then assume that $\mathcal{P}(\mathbf{w}|\mathbf{p})$ is a multivariate Gaussian with respect to the parameters $\mathbf{w}$:
 \begin{equation}
 \mathcal{P}(\mathbf{w}|\mathbf{p}) = \frac{1}{(2\pi)^{n/2} |\Sigma|^{1/2}} \exp \left[-\frac{1}{2}(\mathbf{w}-\mathbf{w}^*)^T \Sigma^{-1}(\mathbf{w}-\mathbf{w}^*)\right],
 \label{eq:normal}
