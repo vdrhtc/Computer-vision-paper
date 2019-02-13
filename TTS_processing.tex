@@ -50,7 +50,7 @@
 
 \preprint{AIP/123-QED}
 
-\title[Automated analysis of spectroscopic data for cQED systems]{Automated analysis of spectroscopic data for cQED systems\\~}
+\title[Automated recognition of spectral data for superconducting qubits]{Automated recognition of spectral data for superconducting qubits\\~}
 % Force line breaks with \\
 
 \author{G.Fedorov}
@@ -84,22 +84,32 @@ To build a full-scale quantum processor it is necessary to automate as many step
 
 \section{\label{sec:level1} Introduction}
 
-Computation on a quantum computer involves operating large numbers of physical quantum bits (qubits). One of the most significant challenges is that today’s qubit systems are not produced identical and cannot be operated identically\cite{kelly2018, chen2018}: typically, control parameters for a device are determined by following a sequence of calibration experiments, and vary among the devices. Since manual tuning of these parameters is not a scalable solution, operating a few dozens of qubits requires developing an autonomous system able to handle the physical device calibration on its own. Moreover, a lot of research is still being done to find the optimal chip designs and fabrication methods. This research includes gathering statistics on many different samples that should be measured and consistently evaluated. An automated tool not only will speed up this process, but as well exclude human error.
+The problems of automatic calibration for superconducting quantum processors based on cQED\cite{blais2004} architecture are acknowledged and were to some extent already discussed in literature\cite{kelly2018, chen2018, bloom2018}. Manual optimization of the control parameters becomes infeasible even with a moderate number of qubits, and an automatic system that will collect and analyse the data coming from the physical device during the calibration is necessary. 
 
-In this work, we are proposing and implementing several methods of data processing and computer vision that aid automatic calibration of circuit QED\cite{blais2007} architectures used to read out superconducting qubits' states. Computer vision is understood here as an enterprise that uses statistical methods to disentangle data using models constructed with the aid of geometry, physics, and learning theory\cite{forsyth2011}. As it will be shown below the output of circuit calibration is almost always an image and it is hardly possible to automatically extract the required information from it without resorting to methods of computer vision.
+In the preceding work, we have devised an algorithm for automatic recognition of the results that occur at the single-tone spectroscopy step for tunable-frequency qubits. The suggested approach infers the qubit parameters from the behaviour of the resonance frequency of the readout cavity depending on the tuning parameter. However, its accuracy does not allow to start immediately the pulsed calibration routines that need more precise values of the qubit frequency. Therefore, it is first necessary to directly observe the qubit spectral line and establish the exact correspondence between its frequency and the tuning parameter.
+
+A common\cite{wallraff2007, jerger2013} method for this is the so-called two-tone spectroscopy (TTS) which is simpler and faster compared to the time-resolve techinques. In the simplest case, this method consists of sending two continuous microwave signals at the sample: one (we will call it $f_p$) is weak and is probing the cavity transition, and the second ($f_{exc}$) is swept in a certain range of frequencies that presumably contain the qubit transition. When the second tone is resonant with the qubit, the first tone observes a shift in the cavity frequency by a change in reflection from or transmission through it. Then, the qubit spectral line is obtained by recording this change for several frequencies around the resonance.  For qubits with tunable frequency, TTS may be done with an additional sweep of the corresponding tuning parameter (i.e. some current $I$). This way we observe the movement of the qubit spectral line in frequency and call its trajectory $f_{ge}(I)$. Besides, when TTS is performed in a wide range of excitation frequencies and currents, it can give the experimenter an insight about the parasitic modes and/or other spurious transitions in the system (i.e. thermally induced), and therefore is a simple tool to monitor the sample quality.
+
+The scheme of the experimental application of the method is depicted in \autoref{fig:detection}(a) where we show the sequence of actions involving TTS for a tunable qubit. Firstly, with the initial assumption for the qubit frequency dependence on the current $f_{ge}^{(0)}(I)$, the TTS is launched with appropriate ranges in $f_{exc}$ and $I$ to capture the part of the qubit spectral line of interest. The resulting heatmap plot is then visually examined to check for apparent different-colour lines with shapes similar to the expectation $f_{ge}^{(0)}(I)$. If such lines are present, they are used instead of $f_{ge}^{(0)}(I)$ to get the more precise values for $f_{ge}(I)$ (possibly, through fitting). Additionally, the experimenter may look for other transitions; for example, for transmons\cite{koch2007} the transition $f_{gf/2}(I)$ is used to extract the shunting capacitance.
+
+While the software implementation of the two-tone spectroscopy itself is not conceptually complicated, the automated interpretation of the recorded data is a significant problem. To demonstrate that, in \autoref{fig:detection}(b) we sketch the desired behaviour of the algorithm for two significantly different results of the TTS (raw data is shown). The first example shows a wide scan in both current and frequency capturing not only the two transmon transitions (the inverted-U curves one below other), but as well two horizontal resonances and some vertical artefacts. The second one shows a narrow scan for another sample which captures just the three transmon lines around their maxima (the second line $f_{gf/2}$ is the brightest among all, but contains less fewer due to low resolution), but now the noise in the data is higher. Besides, the images can contain sideband transitions
+
+
+ As can be seen, for different samples the current ranges may differ by orders of magnitude, and the maximal frequencies of the qubits $f_{ge}^{max}$  (located at the pinnacle of the curves) also may vary significantly. This is 
+
+In this work, we are developing an algorithm that 
 
 The proposed methods are accurate, fast and robust to noise, applicable to superconducting qubits with a periodic and parametrizable spectrum, and compatible with the state-of-the-art paradigm of one readout resonator per one qubit\cite{versluis2017, kelly2015}. Therefore, the suggested approach is scalable and can be applied to processors with any number of qubits.
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{detection_tts}
+	\caption{lololololololololololololololololololololo.}
+	\label{fig:detection}	
+\end{figure} 
 
 The flow of an experiment that characterizes a single qubit on a chip is depicted schematically in \autoref{fig:detection}(a). It is similar to the classic procedures described in Refs. [\onlinecite{jerger2013, chen2018}] for measuring cQED samples with qubits of tunable frequency. For non-tunable qubits, a different algorithm of automatic calibration is described in the patent application Ref. [\onlinecite{bloom2018}].
 
 First of all, it is necessary to detect the positions of the resonance peaks corresponding to the readout resonators. Resonator search provides the scan range for the probe frequency $\Delta f_p$ in single-tone spectroscopy (STS). STS records the behaviour of the resonance peak while changing the magnetic field applied to the sample (controlled by some current $I$). By processing the results of the STS, one can estimate the qubit frequency depending on $I$ (this coarse estimation is denoted as  $f^{(0)}_{ge}(I)$). Conversely, the resonator frequency $f_r(I)$ and the coupling strength $g$  may be found accurately. Based on these results, one may set the scan range for the two-tone spectroscopy (TTS) in excitation frequency $\Delta f_{exc}$ and current $\Delta I$. Next, from TTS, we can obtain various qubit transition frequencies dependence on current $f_{ge}(I), f_{gf/2}(I),$ etc. with accuracy sufficient for pulsed experiments.  After that, pulsed calibrations may be started to optimize gate fidelities. In overall, the process is structured so that the results of one measurement define the parameters of the next, successively acquiring more accurate information about the physical system.
-
-\begin{figure*}
-	\centering
-	\includegraphics[width=\linewidth]{detection}
-	\caption{(a) Common experiment flow for a tunable-frequency qubit: usually, three continuous wave spectroscopic measurements are performed before pulsed experiments, and each next experiment is based on the results of the previous ones. (b) Examples of the desired results after the detection for two qualitatively different STS outcomes. The heatmaps should be brought into correspondence with the 2D model curves. In the first row, two model curves that should be fitted simultaneously since the model is discontinuous. (c) Examples of the desired results after processing TTS data. The heatmap should be brought into correspondence with the model of the qubit spectrum which may not be single-valued since several transitions may be visible.}
-	\label{fig:detection}	
-\end{figure*} 
 
 The measurement outcomes that contain information about the system properties may be divided in two groups: some results contain 1D curves (single-valued functions f(x)), and others contain 2D data (heatmap images, f(x,y)). The scope of this work is confined to the automatic analysis the latter results. In \autoref{fig:detection}(b,c) we illustrate examples of correlated measured data and the theoretical model. \autoref{fig:detection}(b) shows that STS data should be interpreted using two discontinuous curves (upper row) or a single continuous curve (lower row) that are defined by the model. Then, \autoref{fig:detection}(c) shows how qubit spectral lines should be detected. The main problems here are that, firstly, several spectral lines may be observed even for a single qubit (and thus the model is not single-valued), secondly, that spurious non-qubit transitions should be ignored, and, finally, the noise.
 
@@ -150,7 +160,7 @@ The presence of several bright lines along with noise makes it in general imposs
 
 
 
-\subsubsection{Thresholding the data}
+\subsection{Thresholding the data}
 
 Similar to the reasoning in \autoref{sec:extract_fr}, the first thing to do is to reduce the three-dimensional picture \autoref{fig:twotone} to two dimensions. This is done in several steps.
 
@@ -175,7 +185,7 @@ The final extracted points are shown in \autoref{fig:extract_points} in black cr
 	\label{fig:extract_points}
 \end{figure}
 
-\subsubsection{Fitting binary data}
+\subsection{Fitting binary data}
 
 \paragraph{General outline of the method.} In most cases, even the filtered binary data contains noise and, importantly, is not single-valued for each flux value. This means that standard curve fitting methods are not applicable, and thus we resort to a hybrid algorithm that combines features of the Hough transform\cite{hough1962} for global optimization and Nelder-Mead search local optimization. The algorithm bases on three main parts: the point selection procedure, solution ranking and parameter sampling. The selection procedure is universal, and the latter two parts come in two variations depending on which type of optimization is used.
 
