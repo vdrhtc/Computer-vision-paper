@@ -50,6 +50,7 @@
 \usepackage{makecell}
 \usepackage[inline, nomargin]{fixme}
 \usepackage{physics}
+
 \graphicspath{{Pictures/}}
 \begin{document}
 
@@ -129,7 +130,7 @@ The structure of the rest of the paper is as follows. First, we describe our app
 
 Before describing the used methods, we first highlight important peculiarities of the data itself and some essential experimental details. A sample in the cQED architecture is usually studied in terms of how it interacts with incident microwave radiation. Therefore, the standard mathematical concept to describe its properties is the scattering matrix $S_{ij}$ which shows how harmonic signals interact with $i$\textsuperscript{th} and $j$\textsuperscript{th} ports of the sample. For example, the absolute value of the complex scattering parameter $S_{21}(f_p)$ shows the amplitude of the signal transmission between the ports 1 and 2 at some probe frequency $f_p$. Alternatively, $\angle S_{11}(f_p)$ would show the change of the signal phase after the reflection from the port 1. By varying the probe frequency and other control parameters, we can record changes in $S_{ij}$ and from that draw conclusions about the state of the studied device.
 
-As an example, in \autoref{fig:anti_exp}(a) we show a heatmap for the value $|S_{21}|$ obtained in STS for a notch-type (side-coupled) coplanar waveguide resonator connected to a tunable transmon qubit. $|S_{21}|$ is shown in colour, and two other axes show the probe frequencies $f_p$ and the current values for which it was recorded. Looking at the slices of the data in \autoref{fig:anti_exp}(b), one can indeed interpret them as a shift of the resonator dip depending on the applied current. Since the resonator dip consists of 
+As an example, in \autoref{fig:anti_exp}(a) we show a heatmap for the value $|S_{21}|$ obtained in STS for a notch-type (side-coupled) coplanar waveguide resonator connected to a tunable transmon qubit. $|S_{21}|$ is shown in colour, and two other axes show the probe frequencies $f_p$ and the current values for which it was recorded. Looking at the data slices in \autoref{fig:anti_exp}(b), one can say that the plot shows a movement of the resonator dip depending on the applied current. 
 
 Here we have shown only the ampltude $|S_{21}|$; however, the phase of the signal is also important. While the amplitude has a local minimum at resonance, the phase has a local maximum of its derivative there, and, in fact, for certain kinds of readout resonators the phase contains less noise than the amplitude and should be preferred. This means that for the general case, the interpretation of the data is not as straightforward as just looking at the location of the minimal transmission.
 
@@ -282,7 +283,7 @@ where $\sigma_1$ is the added noise. Obviously, the resulting SNR in this scale 
 
 Using the described common scale for the measurements (a), (b) and (c), we test the algorithm stability by launching it 50 times for different added noise realizations for a range of variances $\sigma_1$: the added noise power is steadily increased, and the resulting SNR is being calculated with \eqref{eq:SNR}. We then record all fitting results, and calculate their mean value, 25\textsuperscript{th} and 75\textsuperscript{th} percentiles for each variance $\sigma_1$.  Since the original noise is fixed, the variance of the fitting results will go to zero at SNR=$ r/\sigma_0 $ where the added noise is negligible and the fit converges to the same values as in \autoref{tab:sts_results}. 
 
-In \autoref{fig:noise_test} we plot the results of the test outlined above. As one can see from the graph, the algorithm becomes stable above SNR=3, and the lowest SNRs before divergence occurs are around 2. The original data SNR for (a) is 19, and thus in the tests $\sigma_1 > 5\sigma_0$. Conversely, the original data SNR for (b) and (c) are much lower, and thus $\sigma_1 \approx \sigma_0$ in the tests. This means that for (b) and (c) the variance of the fitting results shown with the clouds in \autoref{fig:noise_test} is approximately two times lower than it would be if all the noise was generated.
+In \autoref{fig:noise_test} we plot the results of the test outlined above. As one can see from the graph, the algorithm becomes stable above SNR=3, and the lowest SNRs before divergence occurs are around 2. The original data SNR for (a) is 19, and thus in the tests $\sigma_1 > 5\sigma_0$. Conversely, the original data SNR for (b) and (c) are much lower, and thus $\sigma_1 \approx \sigma_0$ in the tests. This means that for (b) and (c) the variance of the fitting results shown with the clouds in \autoref{fig:noise_test} is lower than it would be if all the noise was generated. To cope with this problem, in Appendix \ref{sec:ML} we test the algorithm on the synthetic data where the noise may be fully controlled.
 
 In overall, the detection algorithm is stable even at very low SNRs where the patterns are barely visible by the human eye. The performance is limited mostly by the resonator frequency detection part.
 
@@ -380,7 +381,7 @@ f_{ge}(\Phi_e) &\approx \sqrt{8 E_J (\Phi_e) E_C} \\
 \end{equation}
 where $f_{ge}^{max} = \sqrt{8 E_J(0) E_C}-E_C$ is the maximal possible frequency. The approximation here is $E_C \approx E_C/\sqrt{\cos\left(\dots\right) \sqrt{1+d^2 \tan^2 \left(\dots\right)}}$  which gives significant errors only when $E_J\approx E_C$ (when $d$ is small and $\Phi_e\approx\pi/2$) and when the expression \eqref{eq:tr_levels} which itself is no longer valid. On the contrary, this approximation simplifies the model since now it depends just on two parameters ($f_{ge}^{max}, d$) instead of three. Therefore, we choose \eqref{eq:tr_model} as the theoretical curve in fitting.
 
-One final note is that in the real-life applications is not possible to know directly the flux $\Phi_e$ that is threaded through the SQUID. The experimenter usually knows only the current $I$ (or voltage) which he applies to some coil that is connected inductively to the SQUID. Then $\Phi_e = M I + \Phi_r$, where $M$ stands for the mutual inductance of the coil and the SQUID, and $\Phi_r$ is some residual flux inherent to the sample. Therefore, in the main text we only the current $I$, the period in current $\Pi = \Phi_0/M$ and the sweet spot current $I_{ss} = -\Phi_r/M$.
+One final note is that in the real-life applications is not possible to know directly the flux $\Phi_e$ that is threaded through the SQUID. The experimenter usually knows only the current $I$ (or voltage) which he applies to some coil that is connected inductively to the SQUID. Then $\Phi_e = M I + \Phi_r$, where $M$ stands for the mutual inductance of the coil and the SQUID, and $\Phi_r$ is some residual flux inherent to the sample. So, in the main text we only use the current $I$, the period in current $\Pi = \Phi_0/M$ and the sweet spot current $I_{ss} = -\Phi_r/M$ and not the corresponding magnetic fluxes.
 
 \section{Circuit QED}\label{sec:cqed}
 
@@ -400,7 +401,7 @@ This is very convenient for our purposes. By substituting the dependence of the 
 
 \section{Maximum likelihood and fit error estimation}\label{sec:ML}
 	
-For a vector $\mathbf{w}$ of parameters, it is easy to calculate the likelihood $ \mathcal{L}(\mathbf{p}|\mathbf{w}) $ to observe the given data points $\mathbf{p} = \{I_i, f_{r,i}\}_{i=0}^N$ if the data points are normally distributed $\mathbb{N}_{\mu_i, \sigma}$ around the model ($\mu_i = \mathcal{M}(I_i, \mathbf{w})$) and are uncorrelated. The sought value is the product of probability densities of the individual data points:
+For a vector $\mathbf{w}$ of parameters, it is easy to calculate the likelihood $ \mathcal{L}(\mathbf{p}|\mathbf{w}) $ to observe the sample data points $\mathbf{p} = \{I_i, f_{r,i}\}_{i=0}^N$ if they are presumed to be normally distributed around the model ($\mathbb{N}_{\mu_i, \sigma}$, $\mu_i = \mathcal{M}(I_i, \mathbf{w})$) and uncorrelated. The sought value is the product of the probability densities of individual data points:
 \begin{equation}
 \mathcal{L}(\mathbf{p}|\mathbf{w}) = \prod_{i=0}^{N} \frac{1}{\sqrt{2\pi}\sigma} \exp[ -(f_{r,i} - \mu_i)^2 / 2 \sigma^2]\label{eq:MLE} 
 \end{equation}
