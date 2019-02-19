@@ -399,7 +399,15 @@ E_{\pm, n}/h &= (n+1)f_c \pm \frac{1}{2}\sqrt{4g^2(n+1)+(f_{ge}-f_c)^2}.
 
 This is very convenient for our purposes. By substituting the dependence of the qubit frequency $f_{ge} \equiv f_{ge}(\Phi_e)$ into these equations, we can get straightforwardly the full system spectrum in dependence on the magnetic flux. In \autoref{fig:anti_theor} we have used the equations \eqref{eq:tr_model}, \eqref{eq:branches1} and \eqref{eq:branches2} to model a tunable transmon interacting with a cavity for various $\Phi_e$ and various $f_{ge}^{max},\ d$. In the lower row of the figure, one can see that it is possible to extract the dependence of the \textit{modified} cavity frequency $f_c^\prime$ on $\Phi_e$ (in the main text, we call it $f_r$ as the experimentally observed resonator frequency); for example, the avoided crossings pattern can be directly observed in \autoref{fig:anti_theor}(a), and the other two possible behaviours for the qubit entirely above or below the resonator in \autoref{fig:anti_theor}(b),(c). To shorten the notation, in the following we will define the corresponding branch frequencies of \eqref{eq:branches2} as $f_{\pm} = ( E_{\pm,0}-E_{g,0})/2\pi$.
 
-\section{Maximum likelihood and fit error estimation}\label{sec:ML}
+\section{Maximum likelihood, Fisher information, Monte-Carlo testing}\label{sec:ML}
+
+\begin{figure*}
+	\includegraphics[width=\linewidth]{MC-test-tr}
+	\includegraphics[width=\linewidth]{MC-test-tr-H}
+	\caption{Monte-Carlo testing of the Nelder-Mead optimization step on the synthetic data (avoided crossings pattern). Model parameters $\mathbf{w}^0$ = ($f_r,\ g,\ \Pi,\ I_{ss},\ f_q^{max},\ d)^T$ were (6 GHz, 50 MHz, 0.7 mA, 0.4 mA, 7 GHz, 0.5)$^T$; the current $I$ took 1000 points between 0 and 1 mA. Added noise $\varepsilon$ was normal with $\sigma=1$ MHz. Fitting was run 5$\cdot 10^4$ times each with random initial points and a new noise realization. \textbf{(a)} Histograms of the estimator values for each fitting parameter. Solid lines show the probability density functions (PDFs) from which the initial guesses for the fits were drawn. \textbf{(b)} Analysis of the variance predicted by the Hessian. Histograms show the distribution of the variance lower bounds of the estimators calculated from 5$\cdot 10^4$ Hessians. Dashed lines with crosses show the expectation values of the histograms. Solid lines with star marks show the calculation with \eqref{eq:fisher_analytic}. Finally, solid lines with crosses show the experimental variances extracted from (a).}
+	\label{fig:mc-test}
+\end{figure*}
+
 	
 For a vector $\mathbf{w}$ of parameters, it is easy to calculate the likelihood $ \mathcal{L}(\mathbf{p}|\mathbf{w}) $ to observe the sample data points $\mathbf{p} = \{I_i, f_{r,i}\}_{i=0}^N$ if they are presumed to be normally distributed around the model ($\mathbb{N}_{\mu_i, \sigma}$, $\mu_i = \mathcal{M}(I_i, \mathbf{w}),\ \sigma = \text{const}$) and uncorrelated. The sought value is the product of the probability densities of individual data points:
 \begin{equation}
@@ -416,12 +424,13 @@ Minimizing this function is equivalent to maximizing the likelihood since the lo
 Next, we consider the error of the fit. Presuming that $\mathbf{w}^*$ is an unbiased estimator of the true parameter vector, we can use the multivariate Cramér-Rao inequality to bound its variance from below. In the general case, the equality is as follows:
 \begin{equation}
 \text{Var}_\mathbf{w}[\mathbf{w}^*] \geq \text{diag} [\hat I(\mathbf{w})^{-1}],\ \forall\,\mathbf{w}.
+\label{eq:cramer-rao}
 \end{equation} 
 Here $\text{Var}_\mathbf{w}$ means the variance of the estimator when the model distribution parameters are $\mathbf{w}$, and $ \hat I(\mathbf{w}) $ is the Fisher information matrix. Since this matrix depends on $\mathbf{w}$, to get the relevant bound we need to calculate it at $ \mathbf{w} = \mathbf{w}^* $. Using the definition of $I(\mathbf{w})$ and assuming the possibility of double differentiation, we can write:
 \begin{align*}
 \hat I(\mathbf{w}) 
 &= E_\mathbf{w} \left[ \grad_\mathbf{w} \ln \mathcal{L} \cdot \grad_\mathbf{w}^T \ln \mathcal{L} \right]\\
-&= E_\mathbf{w} \left[ - \grad_\mathbf{w}^2 \ln \mathcal{L} \right],
+&= E_\mathbf{w} \left[ - \grad_\mathbf{w}^2 \ln \mathcal{L} \right],\
 \end{align*}
 where $E_\mathbf{w}$ means the expectation under $\mathcal{L}(\mathbf{p}|\mathbf{w})$ (averaging over possible realizations of $\mathbf{p}$), and 
 
@@ -437,14 +446,22 @@ where $E_\mathbf{w}$ means the expectation under $\mathcal{L}(\mathbf{p}|\mathbf
 is the Hessian. Next, using \eqref{eq:MLE} and the fact that $E_\mathbf{w}[f_{r,i}] = \mu_i(I_i, \mathbf{w})$, we can derive the analytic expression for $ \hat I(\mathbf{w}$):
 \begin{equation}
 \hat I(\mathbf{w}) = \sum_i \frac{\grad_\mathbf{w}^2 \mu_i^2(I_i, \mathbf{w}) - 2 \mu_i(I_i, \mathbf{w}) \grad_\mathbf{w}^2 \mu_i(I_i, \mathbf{w})}{2\sigma^2}.
+\label{eq:fisher_analytic}
 \end{equation}
 
 Notably, this formula is valid for any type of non-linear MLE with Gaussian noise. Using it, one only needs to calculate the Hessians of the model function $\mathcal{M}(I, \mathbf{w})$ at $\mathbf{w}=\mathbf{w}^*$ for all $I_i$ to obtain the Fisher information matrix.
 
-The final parameter required for the calculation is the measurement error $\sigma^2$ which may be not known beforehand, and for non-linear models it is not possible\cite{ye1998, andrae2010} to derive a valid analytic expression for the corresponding estimator $(\sigma^2)^*$ due to the unknown number of the effective degrees of freedom. One way to solve this problem is to find $\sigma$ independently by measuring the variance of $f_r$ at some fixed $I$. However, our numerical tests show empirically that using the expression from the linear regression
-$(\sigma^{2})^* = \chi^2/(N-M)$, where $M=6$ is the dimension of $\mathbf{w}$, agrees well with the known $\sigma$ on the synthetic data ($\langle(\sigma^{2})^*- \sigma^2\rangle < 0.01 \sigma^2$)  even and especially when $N$ is as small as 18; this was tested with 5000 different fits).
+The final parameter required for the calculation is the measurement error $\sigma^2$ which may be not known beforehand, and for non-linear models it is not possible\cite{ye1998, andrae2010} to derive a valid analytic expression for the corresponding estimator $(\sigma^2)^*$ due to the unknown number of the effective degrees of freedom. One way to solve this problem is to find $\sigma^2$ independently by measuring the variance of $f_r$ at some fixed $I$. However, our numerical tests show empirically that using the expression from the linear regression
+$(\sigma^{2})^* = \chi^2/(N-M)$, where $M=6$ is the dimension of $\mathbf{w}$, agrees well with the known $\sigma$ on the synthetic data ($\langle|(\sigma^{2})^*- \sigma^2|\rangle < 0.01 \sigma^2$)  even and especially when $N$ is as small as 18; this was tested with 5000 different fits).
 
-Finally, we study the behaviour of the Nelder-Mead optimization of the loss function near $\mathbf{w}^0$ using a Monte-Carlo simulation on the synthetic data  $f_{r,i} = \mathcal{M}(I_i, \mathbf{w}) + \epsilon_i$ where $\epsilon_i$ is drawn from the normal distribution with $\mu=0,\  \sigma=0.1$ MHz.
+Finally, to assess the accuracy of the variance lower bound prediction based on the Fisher information, we study the behaviour of the Nelder-Mead optimization of the loss function near $\mathbf{w}^0$ using a Monte-Carlo simulation on the synthetic data  $f_{r,i} = \mathcal{M}(I_i, \mathbf{w}) + \epsilon_i$ where $\epsilon_i$ is drawn from the normal distribution with $\mu=0,\ \sigma=0.1$ MHz. The results are presented in 
+\autoref{fig:mc-test}. 
+
+Firstly, in \autoref{fig:mc-test}(a) one can find the experimental distributions of the components of the estimator $\mathbf{w}^*$ after $5\cdot 10^4$ trials. Each trial includes two randomized steps. Firstly, since the algorithm requires an initial point from where the optimization starts, we choose it randomly; each parameter is drawn from a uniform distribution around the true value (these are shown with solid lines in \autoref{fig:mc-test}(a)). Secondly, we generate a new random sample of noise and add it to the model. The resulting histograms show how the algorithm converges to different optimal vectors $\mathbf{w}^*$. The variances of these histograms should be, in theory, bound from below by \eqref{eq:cramer-rao}.
+
+To test this statement, for each parameter we look at the three certain values in \autoref{fig:mc-test}(b). The first one (solid lines with crosses) is the experimental variance calculated from \autoref{fig:mc-test}(a). The second one (solid lines with star marks) is the variance lower bound calculated with \eqref{eq:cramer-rao} and \eqref{eq:fisher_analytic}. Finally, the third one (dashed lines with crosses) is the lower bound calculated only with \eqref{eq:cramer-rao}. For the latter, the Hessian expectation in the Fisher information matrix definition is calculated empirically from the Monte-Carlo data using $5\cdot 10^4$ numerically calculated Hessians (KOSYAK).
+
+As one can see, the lower bound
 
 \begin{comment}
 \fxfatal{It appears that everything below is inconclusive at least. An estimation of confidence intervals is a rather tricky topic. Should you postpone the attempt till the second article, improve you statistical background or find a co-author in the meantime?}Next, we want to estimate the errors on the found  $\mathbf{w}^*$. To understand the meaning of these errors, we presume that there is a posterior probability distribution on $\mathbf{w}$ given the data points $\mathbf{p}$. We then assume\fxfatal{Is this assumption justified by something?} that $\mathcal{P}(\mathbf{w}|\mathbf{p})$ is a multivariate Gaussian with respect to the parameters $\mathbf{w}$:

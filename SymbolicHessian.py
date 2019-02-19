@@ -1,4 +1,4 @@
-from sympy import *
+from sympy import lambdify, Symbol
 from sympy.matrices.dense import hessian
 from numpy import linspace, ones, ones_like, where, logical_and, zeros, concatenate
 
