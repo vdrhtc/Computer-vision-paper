@@ -41707,11 +41707,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.93519019"
-     inkscape:cx="375.17429"
-     inkscape:cy="-7.7076349"
+     inkscape:zoom="3.7407608"
+     inkscape:cx="70.244547"
+     inkscape:cy="113.27004"
      inkscape:document-units="mm"
-     inkscape:current-layer="g39507"
+     inkscape:current-layer="g104871-0"
      showgrid="false"
      showguides="false"
      inkscape:guide-bbox="true"
@@ -41769,7 +41769,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -42629,7 +42629,7 @@
              id="tspan45271-3"
              x="130.69969"
              y="31.224609"
-             style="font-size:9.82901382px;stroke-width:0.81908453">Resonator seach</tspan></text>
+             style="font-size:9.82901382px;stroke-width:0.81908453">Resonator search</tspan></text>
       </g>
       <g
          id="g105081-6"
