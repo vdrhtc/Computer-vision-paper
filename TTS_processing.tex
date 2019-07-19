@@ -53,7 +53,7 @@
 \title[Automated recognition of spectral data for superconducting qubits]{Automated recognition of spectral data for superconducting qubits\\~}
 % Force line breaks with \\
 
-\author{G.Fedorov}
+\author{G.P. Fedorov}
 \email{gleb.fedorov@phystech.edu}
 
 \affiliation{ 
@@ -63,7 +63,7 @@ Russian Quantum Center, Skolkovo village, Russia
 Moscow Institute of Physics and Technology, Dolgoprundiy, Russia
 }%
 
-\author{A. Ustinov}
+\author{A.V. Ustinov}
 \affiliation{ 
 Russian Quantum Center, Skolkovo village, Russia
 }%
@@ -192,16 +192,16 @@ The final extracted points are shown in \autoref{fig:extract_points} in black cr
 The general idea for the first part is illustrated in \autoref{fig:hough_illustration}. Here, three narrow frequency bands of $\Delta f$ are chosen around the model spectral lines calculated for tested parameters by \eqref{eq:tr_spectrum}. Points outside the bands are considered far away and are ignored. All the points inside a band are attributed to its line and included in its loss function. If at a certain flux there are several points inside a band, only the closest one is chosen and the rest (contentious) are ignored. 
 \begin{figure}[b]
 	\centering
-	\includegraphics[width=0.8\linewidth]{hough_illustration}
+	\includegraphics[width=\linewidth]{hough_illustration}
 	\caption{An illustration for the loss function definition. In different colours are the frequency bands and the corresponding selected points, black points are ignored.}
 	\label{fig:hough_illustration}
 \end{figure}
-Let $P_{1,2,3}$ be the sets of points selected for corresponding transition lines $ge, gf/2, gd/3$ (in blue, orange and green in \autoref{fig:hough_illustration}); the number of points in the sets are $N_{1,2,3}$, $N_\Sigma = \sum_i N_i$, and $M$ is the total number of measured magnetic flux values. Finally, let $D_{1,2,3}$ be the corresponding sets of vertical distances between the selected points and the corresponding spectral lines.
+Let $\{P^{1,2,3}\}$ be the sets of points selected for corresponding transition lines $ge,\ gf/2,\ gd/3$ (in blue, orange and green in \autoref{fig:hough_illustration}); the number of points in those sets are $N_{1,2,3}$, $N_\Sigma = \sum_i N_i$, and $M$ is the total number of measured magnetic flux values. Finally, let $\{D_{1,2,3}\}$ be the corresponding sets of vertical distances between the selected points and the corresponding spectral lines.
 
 
-The second part of the algorithm now has to evaluate the quality of the fit, i.e. be able to rank a supplied sets of optimization parameters. The ranking differs for the brute search and for the local optimization. 
+The second part of the algorithm now has to evaluate the quality of the fit, i.e. be able to rank a supplied set of optimization parameters. The ranking differs for the brute search and for the local optimization. 
 
-In case of the brute search, the evaluation is based both on the total number of selected points $N_\Sigma$ and the normalized squared distances $\langle D_\Sigma^2 \rangle  = {\sum_i \sum_{P_i} D_i^2/N_1}$ (note that we normalize based just on $N_1$ to respect the majority voting in case of low $N_2, N_3$). Maximizing the total number of points included ought to have a higher priority than minimizing the average distances, since otherwise a single selected point lying exactly on the spectral line would win. However, in the presence of spurious spectral lines this prioritization may lead to wrong results since an incorrect solution with a slightly larger $N_\Sigma$ but high normalized distance measure would overshadow the correct one with a low distance measure. To battle this effect and increase the influence of the distance loss, we quantize $N_\Sigma$ into bins of size $N_b$ equal to 25\% of the total number of fluxes $M$, and then choose from the best bin the solution having the lowest distance measure. 
+In case of the brute search, the evaluation is based both on the total number of selected points $N_\Sigma$ and the normalized squared distances $\langle D_\Sigma^2 \rangle  = {\sum_i \sum_{\{P^i\}} D_i^2/N_1}$ (note that we normalize based just on $N_1$ to respect the majority voting in case of low $N_2,\ N_3$). Maximizing the total number of points included ought to have a higher priority than minimizing the average distances, since otherwise a single selected point lying exactly on the spectral line would win. However, in the presence of spurious spectral lines this prioritization may lead to wrong results since an incorrect solution with a slightly larger $N_\Sigma$ but high normalized distance measure would overshadow the correct one with a low distance measure. To battle this effect and increase the influence of the distance loss, we quantize $N_\Sigma$ into bins of size $N_b$ equal to 25\% of the total number of fluxes $M$, and then choose from the best bin the solution having the lowest distance measure. 
 
 Alternatively, for the Nelder-Mead algorithm one should build a loss function that returns just a single value instead of a double-valued rank as before. Since we still want to both maximize the number of points and minimize the mean distances, we take again same binned value $[N_\Sigma/N_b]N_b$ and $\langle D_\Sigma^2 \rangle$ but now calculate the function
 \begin{equation}

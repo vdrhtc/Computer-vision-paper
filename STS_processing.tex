@@ -385,7 +385,7 @@ where $E_{J\Sigma} = E_{J1}+E_{J2}$ ($E_{J1},\ E_{J2}$ are the single junction e
 
 It is also possible to derive analytical expressions for the energy levels and transition frequencies for this type of qubits. The energy of the $m$\textsuperscript{th} level is (in the limit of $E_J\gg E_C$) \cite{koch2007}
 \begin{equation}
-E_m = m \sqrt{8E_J(\Phi_e) E_C} -\frac{E_C}{12}(6m^2+6m).
+E_m = m \sqrt{8E_J(\Phi_e) E_C} -\frac{E_C}{12}(6m^2+6m+3).
 \label{eq:tr_levels}
 \end{equation}
 From this equation, the qubit transition frequency ($ \ket{0}\rightarrow \ket{1}$, or $ \ket{g}\rightarrow \ket{e}$, or the $ge$ transition) may be approximated as 
@@ -396,7 +396,7 @@ f_{ge}(\Phi_e) &\approx \sqrt{8 E_J (\Phi_e) E_C} \\
 \end{aligned}
 \label{eq:tr_model}
 \end{equation}
-where $f_{ge}^{max} = \sqrt{8 E_J(0) E_C}-E_C$ is the maximal possible frequency. The approximation here is $E_C \approx E_C/\sqrt{\cos\left(\dots\right) \sqrt{1+d^2 \tan^2 \left(\dots\right)}}$  which gives significant errors only when $E_J\approx E_C$ (when $d$ is small and $\Phi_e\approx\pi/2$ and when the expression \eqref{eq:tr_levels} itself is no longer valid). On the contrary, this approximation simplifies the model since now it depends just on two parameters ($f_{ge}^{max}, d$) instead of three. Therefore, we choose \eqref{eq:tr_model} as the theoretical curve in fitting.
+where $f_{ge}^{max} = \sqrt{8 E_J(0) E_C}-E_C$ is the maximal possible frequency. The approximation here is $E_C \approx E_C/\sqrt{\cos\left(\dots\right) \sqrt{1+d^2 \tan^2 \left(\dots\right)}}$  which gives non-negligible errors only when $E_J\approx E_C$ (when $d$ is small and $\Phi_e\approx\pi/2$ and when the expression \eqref{eq:tr_levels} itself is no longer valid). On the contrary, this approximation simplifies the model since now it depends just on two parameters ($f_{ge}^{max}, d$) instead of three. Therefore, we choose \eqref{eq:tr_model} as the theoretical curve in fitting.
 
 One final note is that in the real-life applications is not possible to know directly the flux $\Phi_e$ that is threaded through the SQUID. The experimenter usually knows only the current $I$ (or voltage) which he applies to some coil that is connected inductively to the SQUID. Then $\Phi_e = M I + \Phi_r$, where $M$ stands for the mutual inductance of the coil and the SQUID, and $\Phi_r$ is some residual flux inherent to the sample. So, in the main text we only use the current $I$, the period in current $\Pi = \Phi_0/M$ and the sweet spot current $I_{ss} = -\Phi_r/M$ and not the corresponding magnetic fluxes.
 
@@ -421,7 +421,7 @@ This is very convenient for our purposes. By substituting the dependence of the 
 	
 For a vector $\mathbf{w}$ of parameters, we can calculate the likelihood $ \mathcal{L}(\mathbf{p}|\mathbf{w}) $ to observe $N$ sample data points $\mathbf{p} = \{I_i, f_{r,i}\}_{i=1}^N$ if they are presumed to be normally distributed around the model ($\mathbb{N}_{\mu_i, \sigma}$, $\mu_i = \mathcal{M}(I_i, \mathbf{w}),\ \sigma = \text{const}$) and uncorrelated. The sought value is the product of the probability densities for observing the individual data points:
 \begin{equation}
-\mathcal{L}(\mathbf{p}|\mathbf{w}, \sigma) = \prod_{i=1}^{N} \frac{1}{\sqrt{2\pi}\sigma} \exp[ -(f_{r,i} - \mu_i)^2 / 2 \sigma^2]\label{eq:MLE} 
+\mathcal{L}(\mathbf{p}|\mathbf{w}) = \prod_{i=1}^{N} \frac{1}{\sqrt{2\pi}\sigma} \exp[ -(f_{r,i} - \mu_i)^2 / 2 \sigma^2]\label{eq:MLE} 
 \end{equation}
 The maximum likelihood method consists of finding the optimal parameter vector $\mathbf{w}^*$ such that $ \mathcal{L}(\mathbf{p}|\mathbf{w}^*) $ is the highest among all allowed $\mathbf{w} $. The vector $\mathbf{w}^*$ is called an estimator for the true parameter vector $\mathbf{w}^0$. If we take the negative logarithm of the likelihood, we will get the negative log-likelihood function:
 \begin{align*}
